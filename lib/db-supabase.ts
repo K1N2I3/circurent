@@ -217,6 +217,9 @@ function convertItemToDb(item: Item): any {
     available: item.available,
     owner_name: item.ownerName, // Use owner_name in database
     user_id: item.userId || null,
+    // Backward compatibility: also set location if column exists
+    // Use ownerName as location value for compatibility
+    location: item.ownerName || 'CircuRent',
   };
 }
 
