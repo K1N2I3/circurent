@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '../contexts/LanguageContext';
-import AddressInputFree from '../components/AddressInputFree';
+import AddressForm, { AddressData } from '../components/AddressForm';
 import EmailVerification from '../components/EmailVerification';
 
 type Step = 1 | 2 | 3;
@@ -16,7 +16,13 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    address: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: '',
+    } as AddressData,
     password: '',
     confirmPassword: '',
   });
@@ -60,8 +66,28 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (!formData.address.trim()) {
-      setError(language === 'en' ? 'Please enter your address' : 'Inserisci il tuo indirizzo');
+    if (!formData.address.street.trim()) {
+      setError(language === 'en' ? 'Please enter your street address' : 'Inserisci il tuo indirizzo');
+      return;
+    }
+
+    if (!formData.address.city.trim()) {
+      setError(language === 'en' ? 'Please enter your city' : 'Inserisci la tua città');
+      return;
+    }
+
+    if (!formData.address.state.trim()) {
+      setError(language === 'en' ? 'Please enter your state/province' : 'Inserisci la tua regione/provincia');
+      return;
+    }
+
+    if (!formData.address.postalCode.trim()) {
+      setError(language === 'en' ? 'Please enter your postal code' : 'Inserisci il tuo codice postale');
+      return;
+    }
+
+    if (!formData.address.country.trim()) {
+      setError(language === 'en' ? 'Please select your country' : 'Seleziona il tuo paese');
       return;
     }
 
@@ -297,27 +323,16 @@ export default function RegisterPage() {
                   {language === 'en' ? 'Step 2: Your Address' : 'Passo 2: Il Tuo Indirizzo'}
                 </h3>
                 <p className="text-gray-400 text-sm">
-                  {language === 'en' ? 'Help us find you with Google Maps' : 'Aiutaci a trovarti con Google Maps'}
+                  {language === 'en' ? 'Enter your shipping address' : 'Inserisci il tuo indirizzo di spedizione'}
                 </p>
               </div>
 
               <div className="animate-fade-in">
-                <label className="block text-sm font-black text-gray-300 mb-3 uppercase tracking-wider">
-                  {language === 'en' ? 'Address' : 'Indirizzo'}
-                </label>
-                {/* 使用免费版本（OpenStreetMap）- 完全免费，无需 API 密钥 */}
-                <div className="mb-24">
-                  <AddressInputFree
-                    value={formData.address}
-                    onChange={(address) => setFormData({ ...formData, address })}
-                    required
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  {language === 'en' 
-                    ? '💡 Using free address search (OpenStreetMap - No API key required)' 
-                    : '💡 Utilizzo ricerca indirizzi gratuita (OpenStreetMap - Nessuna chiave API richiesta)'}
-                </p>
+                <AddressForm
+                  value={formData.address}
+                  onChange={(address) => setFormData({ ...formData, address })}
+                  required
+                />
               </div>
 
               <div className="flex gap-4 mt-8 relative z-10">

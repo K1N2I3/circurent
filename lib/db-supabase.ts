@@ -139,12 +139,34 @@ export const rentalsDbSupabase = {
 
 // 转换函数：数据库格式 <-> 应用格式
 function convertUserFromDb(dbUser: any): User {
+  // Handle address: can be string (old format) or JSON object (new format)
+  let address: User['address'] = undefined;
+  if (dbUser.address) {
+    try {
+      // Try to parse as JSON if it's a string
+      const parsed = typeof dbUser.address === 'string' 
+        ? JSON.parse(dbUser.address) 
+        : dbUser.address;
+      
+      // Check if it's the new format (object with street, city, etc.)
+      if (parsed && typeof parsed === 'object' && 'street' in parsed) {
+        address = parsed;
+      } else {
+        // Old format: convert string to AddressData if possible, otherwise undefined
+        address = undefined;
+      }
+    } catch {
+      // If parsing fails, treat as old format and set to undefined
+      address = undefined;
+    }
+  }
+
   return {
     id: dbUser.id,
     email: dbUser.email,
     password: dbUser.password,
     name: dbUser.name,
-    address: dbUser.address || undefined,
+    address,
     createdAt: dbUser.created_at,
   };
 }
@@ -155,7 +177,8 @@ function convertUserToDb(user: User): any {
     email: user.email,
     password: user.password,
     name: user.name,
-    address: user.address || null,
+    // Store address as JSON string in database
+    address: user.address ? JSON.stringify(user.address) : null,
     created_at: user.createdAt,
   };
 }

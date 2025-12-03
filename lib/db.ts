@@ -38,12 +38,20 @@ function writeData<T>(filePath: string, data: T): void {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
+export interface AddressData {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
 export interface User {
   id: string;
   email: string;
   password: string; // 实际应用中应该存储哈希
   name: string;
-  address?: string;
+  address?: AddressData; // Changed from string to AddressData object
   createdAt: string;
 }
 
