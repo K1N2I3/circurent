@@ -76,9 +76,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate unique ID (timestamp + random string to avoid collisions)
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
     // Create new item
     const newItem = {
-      id: Date.now().toString(),
+      id: uniqueId,
       name: name.trim(),
       description: description.trim(),
       category: category.trim(),

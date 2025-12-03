@@ -17,8 +17,13 @@ export async function GET(request: NextRequest) {
 
     const allItems = await itemsDb.getAll();
     const userItems = allItems.filter(item => item.userId === user.userId);
+    
+    // Remove duplicates based on ID (in case of duplicate inserts)
+    const uniqueItems = Array.from(
+      new Map(userItems.map(item => [item.id, item])).values()
+    );
 
-    return NextResponse.json(userItems);
+    return NextResponse.json(uniqueItems);
   } catch (error) {
     console.error('Error fetching user items:', error);
     return NextResponse.json(
