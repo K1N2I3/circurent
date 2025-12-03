@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Rental, Item } from '@/lib/db';
 import { useLanguage } from '../contexts/LanguageContext';
 import ItemImage from '../components/ItemImage';
 
-export default function DashboardPage() {
+// Component that uses useSearchParams - must be wrapped in Suspense
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, language } = useLanguage();
@@ -210,5 +211,18 @@ export default function DashboardPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center pt-20 bg-[#0a0a0f]">
+        <div className="text-xl text-white">Loading...</div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
