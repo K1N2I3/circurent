@@ -112,14 +112,27 @@ async function sendVerificationEmail(email: string, code: string): Promise<boole
           console.error(`   Status: ${error.statusCode || 'N/A'}`);
           console.error(`   Type: ${error.name || 'N/A'}`);
           console.error(`   Message: ${error.message || 'N/A'}`);
+          console.error(`   From Email Used: ${fromEmail}`);
+          console.error(`   Environment: ${process.env.NODE_ENV}`);
+          console.error(`   Vercel Env: ${process.env.VERCEL_ENV || 'local'}`);
           
           // Provide specific guidance based on error type
           if (error.message?.includes('only send testing emails to your own email address')) {
             console.error('\n💡 解决方案 (Solution):');
-            console.error('   1. 验证您的域名: https://resend.com/domains');
-            console.error('   2. 更新 .env.local 中的 RESEND_FROM_EMAIL');
-            console.error('   3. 或暂时使用注册邮箱 (hudefei1979@gmail.com) 进行测试');
+            console.error('   1. 确认在 Vercel 中已配置 RESEND_FROM_EMAIL = CircuRent <noreply@circurent.it>');
+            console.error('   2. 确认已重新部署项目');
+            console.error('   3. 检查域名验证状态: https://resend.com/domains');
+            console.error('   4. 查看调试信息: https://your-app.vercel.app/api/debug/email-config');
             console.error('\n   详细步骤请查看: RESEND_DOMAIN_SETUP.md\n');
+          }
+          
+          if (error.message?.includes('domain') || error.message?.includes('from')) {
+            console.error('\n💡 域名相关错误:');
+            console.error(`   当前使用的发送地址: ${fromEmail}`);
+            console.error('   请确认:');
+            console.error('   1. 域名 circurent.it 在 Resend 中显示为 Verified');
+            console.error('   2. Vercel 环境变量 RESEND_FROM_EMAIL 已正确配置');
+            console.error('   3. 已重新部署项目使环境变量生效\n');
           }
           
           throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
