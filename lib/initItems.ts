@@ -20,7 +20,7 @@ export const initialItems: Item[] = [
     category: 'Electronics',
     pricePerDay: 80,
     image: '📷',
-    imageUrl: '',
+    imageUrl: 'https://m.media-amazon.com/images/I/81R7ewwBg3L.jpg',
     available: true,
     location: 'Rome'
   },

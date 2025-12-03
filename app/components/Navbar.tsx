@@ -5,11 +5,19 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import UserMenu from './UserMenu';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
 
 export default function Navbar() {
   const router = useRouter();
   const { t } = useLanguage();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -27,25 +35,23 @@ export default function Navbar() {
       if (response.ok) {
         const data = await response.json();
         setIsLoggedIn(data.authenticated || false);
+        
+        // If authenticated, fetch user data
+        if (data.authenticated) {
+          const userResponse = await fetch('/api/auth/user');
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            setUser(userData);
+          }
+        }
       } else {
         setIsLoggedIn(false);
+        setUser(null);
       }
     } catch (error) {
       // Silently handle errors - user is not logged in
       setIsLoggedIn(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      setIsLoggedIn(false);
-      // Force redirect to home page and refresh
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Even if API call fails, redirect to home
-      window.location.href = '/';
+      setUser(null);
     }
   };
 
@@ -86,20 +92,10 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center space-x-4">
-            {isLoggedIn ? (
+            {isLoggedIn && user ? (
               <>
-                <Link 
-                  href="/dashboard" 
-                  className="text-white/90 hover:text-primary-400 transition-colors font-semibold text-sm"
-                >
-                  {t.nav.myRentals}
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-white/90 hover:text-primary-400 transition-colors font-semibold text-sm"
-                >
-                  {t.nav.logout}
-                </button>
+                <LanguageSwitcher />
+                <UserMenu userName={user.name} />
               </>
             ) : (
               <>
@@ -115,9 +111,9 @@ export default function Navbar() {
                 >
                   {t.nav.register}
                 </Link>
+                <LanguageSwitcher />
               </>
             )}
-            <LanguageSwitcher />
           </div>
         </div>
       </div>
