@@ -31,10 +31,66 @@ export default function RegisterPage() {
   const [emailVerified, setEmailVerified] = useState(false);
   const [addressValid, setAddressValid] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [emailMessage, setEmailMessage] = useState('');
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-check email availability
+  useEffect(() => {
+    const checkEmail = async () => {
+      const email = formData.email.trim();
+      
+      // Reset status if email is empty
+      if (!email || !email.includes('@')) {
+        setEmailStatus('idle');
+        setEmailMessage('');
+        return;
+      }
+
+      // Basic email format check
+      if (!email.includes('.') || email.length < 5) {
+        setEmailStatus('idle');
+        setEmailMessage('');
+        return;
+      }
+
+      setEmailStatus('checking');
+      setEmailMessage('');
+
+      try {
+        const response = await fetch('/api/auth/check-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+
+        if (data.available) {
+          setEmailStatus('available');
+          setEmailMessage(language === 'en' ? 'Email is available' : 'Email disponibile');
+        } else {
+          setEmailStatus('taken');
+          setEmailMessage(language === 'en' ? 'Email already registered' : 'Email già registrata');
+        }
+      } catch (error) {
+        setEmailStatus('idle');
+        setEmailMessage('');
+      }
+    };
+
+    // Debounce email check
+    const timer = setTimeout(() => {
+      checkEmail();
+    }, 800); // Wait 800ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [formData.email, language]);
 
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +103,22 @@ export default function RegisterPage() {
 
     if (!formData.email.trim() || !formData.email.includes('@')) {
       setError(language === 'en' ? 'Please enter a valid email address' : 'Inserisci un indirizzo email valido');
+      return;
+    }
+
+    // Check if email is being checked or already taken
+    if (emailStatus === 'checking') {
+      setError(language === 'en' ? 'Please wait while we check your email' : 'Attendi mentre controlliamo la tua email');
+      return;
+    }
+
+    if (emailStatus === 'taken') {
+      setError(language === 'en' ? 'This email is already registered. Please use a different email or login.' : 'Questa email è già registrata. Usa un\'altra email o accedi.');
+      return;
+    }
+
+    if (emailStatus !== 'available') {
+      setError(language === 'en' ? 'Please wait for email verification' : 'Attendi la verifica dell\'email');
       return;
     }
 
@@ -254,12 +326,54 @@ export default function RegisterPage() {
                     autoComplete="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-5 py-4 bg-[#0a0a0f] border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 transition-all group-hover:border-white/20"
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      setEmailStatus('idle');
+                      setEmailMessage('');
+                    }}
+                    className={`w-full px-5 py-4 bg-[#0a0a0f] border rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all group-hover:border-white/20 ${
+                      emailStatus === 'available' 
+                        ? 'border-green-500/50 focus:ring-green-500 focus:border-green-500/50' 
+                        : emailStatus === 'taken'
+                        ? 'border-red-500/50 focus:ring-red-500 focus:border-red-500/50'
+                        : 'border-white/10 focus:ring-primary-500 focus:border-primary-500/50'
+                    }`}
                     placeholder={t.auth.email}
                   />
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary-500/0 via-primary-500/0 to-primary-500/0 group-hover:from-primary-500/5 group-hover:via-primary-500/10 group-hover:to-primary-500/5 transition-all pointer-events-none"></div>
+                  
+                  {/* Email status indicator */}
+                  {emailStatus !== 'idle' && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      {emailStatus === 'checking' && (
+                        <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                      )}
+                      {emailStatus === 'available' && (
+                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-black">✓</span>
+                        </div>
+                      )}
+                      {emailStatus === 'taken' && (
+                        <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-black">✗</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+                
+                {/* Email status message */}
+                {emailMessage && (
+                  <div className={`mt-2 text-sm font-semibold ${
+                    emailStatus === 'available' 
+                      ? 'text-green-400' 
+                      : emailStatus === 'taken'
+                      ? 'text-red-400'
+                      : 'text-gray-400'
+                  }`}>
+                    {emailMessage}
+                  </div>
+                )}
               </div>
 
               <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
