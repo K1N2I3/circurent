@@ -37,7 +37,16 @@ export default function ProfilePage() {
         router.push('/login');
         return;
       }
-      const userData = await response.json();
+      const userData: User = await response.json();
+      // Parse address if it's a JSON string
+      if (userData.address && typeof userData.address === 'string') {
+        try {
+          userData.address = JSON.parse(userData.address) as AddressData;
+        } catch {
+          // If parsing fails, set to undefined
+          userData.address = undefined;
+        }
+      }
       setUser(userData);
     } catch (error) {
       console.error('Failed to fetch user data:', error);
@@ -101,22 +110,27 @@ export default function ProfilePage() {
                   {language === 'en' ? 'Address' : 'Indirizzo'}
                 </div>
                 <div className="text-white font-semibold text-lg">
-                  {user.address ? (
-                    isAddressData(user.address) ? (
-                      <div className="space-y-1">
-                        <div>{user.address.street}</div>
-                        <div className="text-gray-400 text-sm">
-                          {user.address.city}, {user.address.state} {user.address.postalCode}
+                  {(() => {
+                    if (!user.address) {
+                      return language === 'en' ? 'Not provided' : 'Non fornito';
+                    }
+                    
+                    const address = user.address;
+                    if (isAddressData(address)) {
+                      return (
+                        <div className="space-y-1">
+                          <div>{address.street}</div>
+                          <div className="text-gray-400 text-sm">
+                            {address.city}, {address.state} {address.postalCode}
+                          </div>
+                          <div className="text-gray-400 text-sm">{address.country}</div>
                         </div>
-                        <div className="text-gray-400 text-sm">{user.address.country}</div>
-                      </div>
-                    ) : (
-                      // Fallback for old string format
-                      String(user.address)
-                    )
-                  ) : (
-                    language === 'en' ? 'Not provided' : 'Non fornito'
-                  )}
+                      );
+                    }
+                    
+                    // Fallback for old string format
+                    return String(address);
+                  })()}
                 </div>
               </div>
 
