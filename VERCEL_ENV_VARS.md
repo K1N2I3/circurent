@@ -62,6 +62,25 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
 ---
 
+### OpenAI API（AI 图片识别功能）
+
+```
+OPENAI_API_KEY
+```
+
+**获取方式**: 
+- 访问 https://platform.openai.com/api-keys
+- 创建新的 API Key
+- 格式: `sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+**注意**: 
+- 需要付费账户（按使用量计费）
+- 如果不配置，AI 图片识别功能将不可用，但其他功能正常
+- 每次图片分析约 $0.002-0.01
+- 详细配置说明请查看 `OpenAI配置指南.md`
+
+---
+
 ## 📝 在 Vercel 中配置步骤
 
 1. **进入项目设置**:
@@ -87,6 +106,7 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 - [ ] `JWT_SECRET` 已配置（至少 32 字符）
 - [ ] `RESEND_API_KEY` 已配置
 - [ ] `RESEND_FROM_EMAIL` 已配置
+- [ ] `OPENAI_API_KEY` 已配置（可选，用于 AI 图片识别）
 - [ ] 所有变量都已添加到 Production、Preview 和 Development 环境
 - [ ] 已重新部署项目
 
