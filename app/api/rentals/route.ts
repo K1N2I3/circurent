@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rentalsDb, itemsDb } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
+// Force dynamic rendering since we use cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();

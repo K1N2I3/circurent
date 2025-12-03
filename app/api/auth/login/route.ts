@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { usersDb } from '@/lib/db';
 import { comparePassword, generateToken } from '@/lib/auth';
 
+// Force dynamic rendering since we use cookies
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
