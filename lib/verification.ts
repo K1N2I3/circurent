@@ -4,11 +4,12 @@ const verificationCodes = new Map<string, { code: string; expiresAt: number }>()
 // Clean up expired codes periodically
 setInterval(() => {
   const now = Date.now();
-  for (const [email, data] of verificationCodes.entries()) {
+  // Use Array.from to convert Map entries to array for iteration
+  Array.from(verificationCodes.entries()).forEach(([email, data]) => {
     if (data.expiresAt < now) {
       verificationCodes.delete(email);
     }
-  }
+  });
 }, 5 * 60 * 1000); // Every 5 minutes
 
 export function storeVerificationCode(email: string, code: string, expiresAt: number): void {
