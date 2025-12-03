@@ -35,28 +35,115 @@ export async function POST(request: NextRequest) {
         subject: 'Test Email - CircuRent',
         html: `
           <!DOCTYPE html>
-          <html>
+          <html lang="en">
           <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-              .header h1 { color: #0a0a0f; margin: 0; font-size: 28px; font-weight: 900; }
-              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                line-height: 1.6;
+                color: #1a1a1a;
+                background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+                padding: 40px 20px;
+                -webkit-font-smoothing: antialiased;
+              }
+              .email-wrapper {
+                max-width: 600px;
+                margin: 0 auto;
+                background: #ffffff;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+              }
+              .header {
+                background: linear-gradient(135deg, #84cc16 0%, #a3e635 50%, #bef264 100%);
+                padding: 50px 30px;
+                text-align: center;
+              }
+              .logo {
+                font-size: 42px;
+                font-weight: 900;
+                color: #0a0a0f;
+                margin: 0;
+                letter-spacing: -1px;
+              }
+              .content {
+                padding: 50px 40px;
+                background: #ffffff;
+              }
+              .greeting {
+                font-size: 24px;
+                font-weight: 700;
+                color: #0a0a0f;
+                margin-bottom: 20px;
+              }
+              .message {
+                font-size: 16px;
+                color: #4a4a4a;
+                margin-bottom: 30px;
+                line-height: 1.7;
+              }
+              .success-badge {
+                background: linear-gradient(135deg, #84cc16 0%, #a3e635 100%);
+                color: #0a0a0f;
+                padding: 20px;
+                border-radius: 12px;
+                text-align: center;
+                font-weight: 700;
+                font-size: 18px;
+                margin: 30px 0;
+              }
+              .info-box {
+                background: #f5f5f5;
+                border-left: 4px solid #84cc16;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 30px 0;
+                font-size: 14px;
+                color: #4a4a4a;
+              }
+              .info-box strong {
+                color: #0a0a0f;
+              }
+              .footer {
+                background: #f5f5f5;
+                padding: 30px 40px;
+                text-align: center;
+                border-top: 1px solid #e0e0e0;
+              }
+              .footer-text {
+                font-size: 12px;
+                color: #9e9e9e;
+                margin: 0;
+              }
             </style>
           </head>
           <body>
-            <div class="container">
+            <div class="email-wrapper">
               <div class="header">
-                <h1>CircuRent</h1>
+                <h1 class="logo">CircuRent</h1>
               </div>
               <div class="content">
-                <h2>Test Email</h2>
-                <p>This is a test email to verify that email sending is working correctly.</p>
-                <p>If you received this email, the configuration is working! ✅</p>
-                <p><strong>From:</strong> ${fromEmail}</p>
-                <p><strong>To:</strong> ${email}</p>
+                <h2 class="greeting">Test Email ✅</h2>
+                <p class="message">
+                  This is a test email to verify that email sending is working correctly.
+                </p>
+                <div class="success-badge">
+                  🎉 Configuration Working!
+                </div>
+                <div class="info-box">
+                  <strong>From:</strong> ${fromEmail}<br>
+                  <strong>To:</strong> ${email}<br>
+                  <strong>Status:</strong> Email service is properly configured
+                </div>
+                <p class="message">
+                  If you received this email, your Resend configuration is working perfectly! You can now send verification emails to any recipient.
+                </p>
+              </div>
+              <div class="footer">
+                <p class="footer-text">© 2024 CircuRent. Test Email</p>
               </div>
             </div>
           </body>

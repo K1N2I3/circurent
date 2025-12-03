@@ -69,33 +69,203 @@ async function sendVerificationEmail(email: string, code: string): Promise<boole
           subject: 'Verify your email address - CircuRent',
           html: `
             <!DOCTYPE html>
-            <html>
+            <html lang="en">
             <head>
               <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <meta http-equiv="X-UA-Compatible" content="IE=edge">
               <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                .header h1 { color: #0a0a0f; margin: 0; font-size: 28px; font-weight: 900; }
-                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-                .code-box { background: #0a0a0f; color: #84cc16; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0; font-size: 32px; font-weight: 900; letter-spacing: 8px; }
-                .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                  line-height: 1.6;
+                  color: #1a1a1a;
+                  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+                  padding: 40px 20px;
+                  -webkit-font-smoothing: antialiased;
+                  -moz-osx-font-smoothing: grayscale;
+                }
+                .email-wrapper {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background: #ffffff;
+                  border-radius: 20px;
+                  overflow: hidden;
+                  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                }
+                .header {
+                  background: linear-gradient(135deg, #84cc16 0%, #a3e635 50%, #bef264 100%);
+                  padding: 50px 30px;
+                  text-align: center;
+                  position: relative;
+                  overflow: hidden;
+                }
+                .header::before {
+                  content: '';
+                  position: absolute;
+                  top: -50%;
+                  left: -50%;
+                  width: 200%;
+                  height: 200%;
+                  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+                  animation: pulse 3s ease-in-out infinite;
+                }
+                @keyframes pulse {
+                  0%, 100% { transform: scale(1); opacity: 0.5; }
+                  50% { transform: scale(1.1); opacity: 0.8; }
+                }
+                .logo {
+                  font-size: 42px;
+                  font-weight: 900;
+                  color: #0a0a0f;
+                  margin: 0;
+                  position: relative;
+                  z-index: 1;
+                  letter-spacing: -1px;
+                  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                }
+                .content {
+                  padding: 50px 40px;
+                  background: #ffffff;
+                }
+                .greeting {
+                  font-size: 24px;
+                  font-weight: 700;
+                  color: #0a0a0f;
+                  margin-bottom: 16px;
+                  line-height: 1.3;
+                }
+                .message {
+                  font-size: 16px;
+                  color: #4a4a4a;
+                  margin-bottom: 40px;
+                  line-height: 1.7;
+                }
+                .code-container {
+                  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+                  border-radius: 16px;
+                  padding: 40px 30px;
+                  text-align: center;
+                  margin: 40px 0;
+                  box-shadow: 0 10px 40px rgba(10, 10, 15, 0.2), 0 0 0 1px rgba(132, 204, 22, 0.1);
+                  position: relative;
+                  overflow: hidden;
+                }
+                .code-container::before {
+                  content: '';
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  height: 3px;
+                  background: linear-gradient(90deg, #84cc16, #a3e635, #bef264, #84cc16);
+                  background-size: 200% 100%;
+                  animation: shimmer 2s linear infinite;
+                }
+                @keyframes shimmer {
+                  0% { background-position: -200% 0; }
+                  100% { background-position: 200% 0; }
+                }
+                .code-label {
+                  font-size: 12px;
+                  font-weight: 600;
+                  color: #84cc16;
+                  text-transform: uppercase;
+                  letter-spacing: 2px;
+                  margin-bottom: 20px;
+                  opacity: 0.9;
+                }
+                .verification-code {
+                  font-size: 48px;
+                  font-weight: 900;
+                  color: #84cc16;
+                  letter-spacing: 12px;
+                  font-family: 'Courier New', monospace;
+                  text-shadow: 0 0 20px rgba(132, 204, 22, 0.5);
+                  margin: 0;
+                  line-height: 1.2;
+                }
+                .expiry-notice {
+                  background: #fff8e1;
+                  border-left: 4px solid #ffc107;
+                  padding: 16px 20px;
+                  border-radius: 8px;
+                  margin: 30px 0;
+                  font-size: 14px;
+                  color: #5d4037;
+                  line-height: 1.6;
+                }
+                .expiry-notice strong {
+                  color: #e65100;
+                }
+                .security-notice {
+                  font-size: 14px;
+                  color: #757575;
+                  margin-top: 30px;
+                  padding-top: 30px;
+                  border-top: 1px solid #e0e0e0;
+                  line-height: 1.6;
+                }
+                .footer {
+                  background: #f5f5f5;
+                  padding: 30px 40px;
+                  text-align: center;
+                  border-top: 1px solid #e0e0e0;
+                }
+                .footer-text {
+                  font-size: 12px;
+                  color: #9e9e9e;
+                  margin: 0;
+                  line-height: 1.6;
+                }
+                .footer-link {
+                  color: #84cc16;
+                  text-decoration: none;
+                  font-weight: 600;
+                }
+                .footer-link:hover {
+                  text-decoration: underline;
+                }
+                @media only screen and (max-width: 600px) {
+                  body { padding: 20px 10px; }
+                  .email-wrapper { border-radius: 16px; }
+                  .header { padding: 40px 20px; }
+                  .logo { font-size: 36px; }
+                  .content { padding: 40px 25px; }
+                  .verification-code { font-size: 36px; letter-spacing: 8px; }
+                  .code-container { padding: 30px 20px; }
+                }
               </style>
             </head>
             <body>
-              <div class="container">
+              <div class="email-wrapper">
                 <div class="header">
-                  <h1>CircuRent</h1>
+                  <h1 class="logo">CircuRent</h1>
                 </div>
                 <div class="content">
-                  <h2>Email Verification</h2>
-                  <p>Thank you for registering with CircuRent! Please use the verification code below to complete your registration:</p>
-                  <div class="code-box">${code}</div>
-                  <p><strong>This code will expire in 10 minutes.</strong></p>
-                  <p>If you didn't request this code, please ignore this email.</p>
-                  <div class="footer">
-                    <p>© 2024 CircuRent. All rights reserved.</p>
+                  <h2 class="greeting">Welcome to CircuRent! 🎉</h2>
+                  <p class="message">
+                    Thank you for registering with CircuRent! To complete your registration and start renting premium items, please verify your email address using the code below.
+                  </p>
+                  
+                  <div class="code-container">
+                    <div class="code-label">Verification Code</div>
+                    <div class="verification-code">${code}</div>
                   </div>
+                  
+                  <div class="expiry-notice">
+                    <strong>⏰ Important:</strong> This verification code will expire in <strong>10 minutes</strong> for security reasons. Please use it promptly.
+                  </div>
+                  
+                  <p class="security-notice">
+                    If you didn't request this verification code, please ignore this email. Your account will remain secure.
+                  </p>
+                </div>
+                <div class="footer">
+                  <p class="footer-text">
+                    © 2024 CircuRent. All rights reserved.<br>
+                    This is an automated email, please do not reply.
+                  </p>
                 </div>
               </div>
             </body>
