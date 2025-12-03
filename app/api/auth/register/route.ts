@@ -3,6 +3,9 @@ import { usersDb } from '@/lib/db';
 import { hashPassword, generateToken } from '@/lib/auth';
 import { initItems } from '@/lib/initItems';
 
+// Force dynamic rendering since we use cookies
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password, name, address } = await request.json();
