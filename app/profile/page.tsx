@@ -5,14 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '../contexts/LanguageContext';
 import UserAvatar from '../components/UserAvatar';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  address?: string;
-  createdAt: string;
-}
+import { User } from '@/lib/db';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -95,17 +88,19 @@ export default function ProfilePage() {
                   {language === 'en' ? 'Address' : 'Indirizzo'}
                 </div>
                 <div className="text-white font-semibold text-lg">
-                  {user.address && typeof user.address === 'object' ? (
-                    <div className="space-y-1">
-                      <div>{user.address.street}</div>
-                      <div className="text-gray-400 text-sm">
-                        {user.address.city}, {user.address.state} {user.address.postalCode}
+                  {user.address ? (
+                    typeof user.address === 'object' && 'street' in user.address ? (
+                      <div className="space-y-1">
+                        <div>{user.address.street}</div>
+                        <div className="text-gray-400 text-sm">
+                          {user.address.city}, {user.address.state} {user.address.postalCode}
+                        </div>
+                        <div className="text-gray-400 text-sm">{user.address.country}</div>
                       </div>
-                      <div className="text-gray-400 text-sm">{user.address.country}</div>
-                    </div>
-                  ) : user.address ? (
-                    // Fallback for old string format
-                    user.address
+                    ) : (
+                      // Fallback for old string format
+                      String(user.address)
+                    )
                   ) : (
                     language === 'en' ? 'Not provided' : 'Non fornito'
                   )}
