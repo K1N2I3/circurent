@@ -174,8 +174,11 @@ export default function PaymentPage() {
                   }}
                   onApprove={async (data, actions) => {
                     const order = await actions.order?.capture();
-                    if (order) {
+                    if (order && order.id) {
                       handlePaymentSuccess(order.id);
+                    } else {
+                      console.error('PayPal order ID is missing');
+                      alert(t.payment.error);
                     }
                   }}
                   onError={(err) => {
