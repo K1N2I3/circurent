@@ -67,12 +67,21 @@ export default function Navbar() {
 
           {/* Navigation Links - Centered */}
           <div className="hidden lg:flex items-center space-x-8 absolute left-1/2 transform -translate-x-1/2">
-            <Link 
-              href="/" 
-              className="text-white/90 hover:text-primary-400 transition-colors font-bold text-sm uppercase tracking-widest"
-            >
-              {t.nav.home}
-            </Link>
+            {isLoggedIn ? (
+              <Link 
+                href="/" 
+                className="text-white/90 hover:text-primary-400 transition-colors font-bold text-sm uppercase tracking-widest"
+              >
+                Items
+              </Link>
+            ) : (
+              <Link 
+                href="/" 
+                className="text-white/90 hover:text-primary-400 transition-colors font-bold text-sm uppercase tracking-widest"
+              >
+                {t.nav.home}
+              </Link>
+            )}
           </div>
 
           {/* Right Side */}
