@@ -81,7 +81,7 @@ export const itemsDbSupabase = {
     if (updates.image !== undefined) updateData.image = updates.image;
     if (updates.imageUrl !== undefined) updateData.image_url = updates.imageUrl;
     if (updates.available !== undefined) updateData.available = updates.available;
-    if (updates.location !== undefined) updateData.location = updates.location;
+    if (updates.ownerName !== undefined) updateData.owner_name = updates.ownerName;
     
     const { error } = await supabaseAdmin.from('items').update(updateData).eq('id', id);
     if (error) throw error;
@@ -193,7 +193,7 @@ function convertItemFromDb(dbItem: any): Item {
     image: dbItem.image,
     imageUrl: dbItem.image_url || undefined,
     available: dbItem.available,
-    location: dbItem.location,
+    ownerName: dbItem.owner_name || dbItem.location || 'CircuRent', // Support both old and new field names
   };
 }
 
@@ -207,7 +207,7 @@ function convertItemToDb(item: Item): any {
     image: item.image,
     image_url: item.imageUrl || null,
     available: item.available,
-    location: item.location,
+    owner_name: item.ownerName, // Use owner_name in database
   };
 }
 

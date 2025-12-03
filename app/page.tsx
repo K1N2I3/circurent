@@ -200,8 +200,8 @@ export default function Home() {
                           </h3>
                           <p className="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed">{item.description}</p>
                           <div className="flex items-center text-xs text-gray-500">
-                            <span className="mr-1.5">📍</span>
-                            <span className="font-medium">{item.location}</span>
+                            <span className="mr-1.5">👤</span>
+                            <span className="font-medium">{item.ownerName}</span>
                           </div>
                         </div>
                       </Link>

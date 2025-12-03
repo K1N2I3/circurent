@@ -11,7 +11,7 @@ export const initialItems: Item[] = [
     image: '🚴',
     imageUrl: 'https://giant-bicycles.ae/wp-content/uploads/2025/08/G061095009124_1-800x800.jpg',
     available: true,
-    location: 'Milan'
+    ownerName: 'CircuRent'
   },
   {
     id: '2',
@@ -22,7 +22,7 @@ export const initialItems: Item[] = [
     image: '📷',
     imageUrl: 'https://m.media-amazon.com/images/I/81R7ewwBg3L.jpg',
     available: true,
-    location: 'Rome'
+    ownerName: 'CircuRent'
   },
   {
     id: '3',
@@ -33,7 +33,7 @@ export const initialItems: Item[] = [
     image: '📽️',
     imageUrl: '',
     available: true,
-    location: 'Turin'
+    ownerName: 'CircuRent'
   },
   {
     id: '4',
@@ -44,7 +44,7 @@ export const initialItems: Item[] = [
     image: '⛺',
     imageUrl: '',
     available: true,
-    location: 'Florence'
+    ownerName: 'CircuRent'
   },
   {
     id: '5',
@@ -55,7 +55,7 @@ export const initialItems: Item[] = [
     image: '🚁',
     imageUrl: '',
     available: true,
-    location: 'Venice'
+    ownerName: 'CircuRent'
   },
   {
     id: '6',
@@ -66,7 +66,7 @@ export const initialItems: Item[] = [
     image: '🛴',
     imageUrl: '',
     available: true,
-    location: 'Naples'
+    ownerName: 'CircuRent'
   },
   {
     id: '7',
@@ -77,7 +77,7 @@ export const initialItems: Item[] = [
     image: '🎮',
     imageUrl: '',
     available: true,
-    location: 'Bologna'
+    ownerName: 'CircuRent'
   },
   {
     id: '8',
@@ -88,7 +88,7 @@ export const initialItems: Item[] = [
     image: '🔧',
     imageUrl: '',
     available: true,
-    location: 'Genoa'
+    ownerName: 'CircuRent'
   },
   {
     id: '9',
@@ -99,7 +99,7 @@ export const initialItems: Item[] = [
     image: '🔥',
     imageUrl: '',
     available: true,
-    location: 'Palermo'
+    ownerName: 'CircuRent'
   },
   {
     id: '10',
@@ -110,7 +110,7 @@ export const initialItems: Item[] = [
     image: '💻',
     imageUrl: '',
     available: true,
-    location: 'Milan'
+    ownerName: 'CircuRent'
   },
   {
     id: '11',
@@ -121,7 +121,7 @@ export const initialItems: Item[] = [
     image: '🎹',
     imageUrl: '',
     available: true,
-    location: 'Rome'
+    ownerName: 'CircuRent'
   },
   {
     id: '12',
@@ -132,7 +132,7 @@ export const initialItems: Item[] = [
     image: '🛶',
     imageUrl: '',
     available: true,
-    location: 'Venice'
+    ownerName: 'CircuRent'
   },
   {
     id: '13',
@@ -143,7 +143,7 @@ export const initialItems: Item[] = [
     image: '🥽',
     imageUrl: '',
     available: true,
-    location: 'Turin'
+    ownerName: 'CircuRent'
   },
   {
     id: '14',
@@ -154,7 +154,7 @@ export const initialItems: Item[] = [
     image: '⚙️',
     imageUrl: '',
     available: true,
-    location: 'Florence'
+    ownerName: 'CircuRent'
   },
   {
     id: '15',
@@ -165,7 +165,7 @@ export const initialItems: Item[] = [
     image: '🧺',
     imageUrl: '',
     available: true,
-    location: 'Bologna'
+    ownerName: 'CircuRent'
   },
   {
     id: '16',
@@ -176,7 +176,7 @@ export const initialItems: Item[] = [
     image: '🎸',
     imageUrl: '',
     available: true,
-    location: 'Naples'
+    ownerName: 'CircuRent'
   },
   {
     id: '17',
@@ -187,7 +187,7 @@ export const initialItems: Item[] = [
     image: '🏃',
     imageUrl: '',
     available: true,
-    location: 'Genoa'
+    ownerName: 'CircuRent'
   },
   {
     id: '18',
@@ -198,7 +198,7 @@ export const initialItems: Item[] = [
     image: '🖨️',
     imageUrl: '',
     available: true,
-    location: 'Palermo'
+    ownerName: 'CircuRent'
   },
   {
     id: '19',
@@ -209,7 +209,7 @@ export const initialItems: Item[] = [
     image: '🔭',
     imageUrl: '',
     available: true,
-    location: 'Milan'
+    ownerName: 'CircuRent'
   },
   {
     id: '20',
@@ -220,7 +220,7 @@ export const initialItems: Item[] = [
     image: '🏊',
     imageUrl: '',
     available: true,
-    location: 'Rome'
+    ownerName: 'CircuRent'
   },
   {
     id: '21',
@@ -231,7 +231,7 @@ export const initialItems: Item[] = [
     image: '🎹',
     imageUrl: '',
     available: true,
-    location: 'Turin'
+    ownerName: 'CircuRent'
   },
   {
     id: '22',
@@ -242,7 +242,7 @@ export const initialItems: Item[] = [
     image: '🛹',
     imageUrl: '',
     available: true,
-    location: 'Venice'
+    ownerName: 'CircuRent'
   }
 ];
 

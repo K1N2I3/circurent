@@ -28,7 +28,7 @@ export interface Translations {
     searchPlaceholder: string;
     noItemsFound: string;
     pricePerDay: string;
-    location: string;
+    owner: string;
     unlockFullAccess: string;
     signInOrSignUp: string;
     signUp: string;
@@ -62,7 +62,7 @@ export interface Translations {
   itemDetail: {
     backToHome: string;
     category: string;
-    location: string;
+    owner: string;
     pricePerDay: string;
     available: string;
     notAvailable: string;
@@ -159,7 +159,7 @@ const translations: Record<Language, Translations> = {
       searchPlaceholder: 'Search items...',
       noItemsFound: 'No items found matching your criteria',
       pricePerDay: '/day',
-      location: 'Location',
+      owner: 'Owner',
       unlockFullAccess: 'Unlock Full Access',
       signInOrSignUp: 'Sign In or Sign Up',
       signUp: 'Sign Up',
@@ -191,7 +191,7 @@ const translations: Record<Language, Translations> = {
     itemDetail: {
       backToHome: '← Back to home',
       category: 'Category',
-      location: 'Location',
+      owner: 'Owner',
       pricePerDay: 'Daily price',
       available: '✓ Available',
       notAvailable: '✗ Not available',
@@ -283,7 +283,7 @@ const translations: Record<Language, Translations> = {
       searchPlaceholder: 'Cerca articoli...',
       noItemsFound: 'Nessun articolo trovato corrispondente ai tuoi criteri',
       pricePerDay: '/giorno',
-      location: 'Posizione',
+      owner: 'Proprietario',
       unlockFullAccess: 'Sblocca Accesso Completo',
       signInOrSignUp: 'Accedi o Registrati',
       signUp: 'Registrati',
@@ -315,7 +315,7 @@ const translations: Record<Language, Translations> = {
     itemDetail: {
       backToHome: '← Torna alla home',
       category: 'Categoria',
-      location: 'Posizione',
+      owner: 'Proprietario',
       pricePerDay: 'Prezzo giornaliero',
       available: '✓ Disponibile',
       notAvailable: '✗ Non disponibile',

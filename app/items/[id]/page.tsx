@@ -186,10 +186,10 @@ export default function ItemDetailPage() {
               <div className="grid grid-cols-2 gap-4 mb-10">
                 <div className="glass rounded-2xl p-5 border border-white/10">
                   <div className="flex items-center text-gray-400 mb-3">
-                    <span className="text-2xl mr-3">📍</span>
-                    <span className="text-sm font-bold uppercase tracking-wider">{t.itemDetail.location}</span>
+                    <span className="text-2xl mr-3">👤</span>
+                    <span className="text-sm font-bold uppercase tracking-wider">{language === 'en' ? 'Owner' : 'Proprietario'}</span>
                   </div>
-                  <div className="text-white font-black text-lg">{item.location}</div>
+                  <div className="text-white font-black text-lg">{item.ownerName}</div>
                 </div>
                 <div className="glass rounded-2xl p-5 border border-white/10">
                   <div className="flex items-center text-gray-400 mb-3">

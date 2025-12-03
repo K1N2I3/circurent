@@ -64,7 +64,7 @@ export interface Item {
   image: string; // emoji or image URL
   imageUrl?: string; // actual image URL
   available: boolean;
-  location: string;
+  ownerName: string; // Name of the person renting out this item
 }
 
 export interface Rental {
