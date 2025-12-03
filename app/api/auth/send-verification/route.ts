@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-
-// Store verification codes in memory (in production, use Redis or database)
-const verificationCodes = new Map<string, { code: string; expiresAt: number }>();
+import { storeVerificationCode } from '@/lib/verification';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +18,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     // Store code
-    verificationCodes.set(email, { code, expiresAt });
+    storeVerificationCode(email, code, expiresAt);
 
     // Send email using Resend (recommended) or other service
     // For now, we'll use a simple approach - in production, use Resend API
@@ -242,34 +240,4 @@ async function sendVerificationEmail(email: string, code: string): Promise<boole
   }
 }
 
-// Clean up expired codes periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [email, data] of verificationCodes.entries()) {
-    if (data.expiresAt < now) {
-      verificationCodes.delete(email);
-    }
-  }
-}, 5 * 60 * 1000); // Every 5 minutes
-
-// Export function to verify code
-export function verifyCode(email: string, code: string): boolean {
-  const stored = verificationCodes.get(email);
-  if (!stored) {
-    return false;
-  }
-
-  if (stored.expiresAt < Date.now()) {
-    verificationCodes.delete(email);
-    return false;
-  }
-
-  if (stored.code !== code) {
-    return false;
-  }
-
-  // Code is valid, remove it
-  verificationCodes.delete(email);
-  return true;
-}
 
