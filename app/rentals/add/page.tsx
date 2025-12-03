@@ -200,35 +200,57 @@ export default function AddItemPage() {
 
           {/* AI Suggestion */}
           {aiSuggestion && (
-            <div className="mb-6 bg-primary-500/10 border-2 border-primary-500/30 rounded-2xl p-5">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="text-primary-400 font-black text-lg mb-2">
-                    {language === 'en' ? '✨ AI Suggestion' : '✨ Suggerimento AI'}
-                  </div>
-                  <p className="text-gray-300 text-sm mb-2">
-                    <strong>{language === 'en' ? 'Name:' : 'Nome:'}</strong> {aiSuggestion.name}
-                  </p>
-                  <p className="text-gray-300 text-sm mb-2">
-                    <strong>{language === 'en' ? 'Description:' : 'Descrizione:'}</strong> {aiSuggestion.description}
-                  </p>
-                  <p className="text-gray-300 text-sm">
-                    <strong>{language === 'en' ? 'Category:' : 'Categoria:'}</strong> {aiSuggestion.category}
-                  </p>
+            <div className="mb-6 bg-primary-500/10 border-2 border-primary-500/30 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl">✨</span>
+                <div className="text-primary-400 font-black text-lg">
+                  {language === 'en' ? 'AI Suggestion' : 'Suggerimento AI'}
                 </div>
               </div>
-              <div className="flex gap-3">
+              
+              <div className="space-y-4 mb-5">
+                <div>
+                  <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                    {language === 'en' ? 'Name' : 'Nome'}
+                  </div>
+                  <div className="text-white font-semibold text-base">
+                    {aiSuggestion.name || (language === 'en' ? 'Item' : 'Articolo')}
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                    {language === 'en' ? 'Description' : 'Descrizione'}
+                  </div>
+                  <div className="text-gray-300 text-sm leading-relaxed">
+                    {aiSuggestion.description || (language === 'en' ? 'A rental item. Please provide more details.' : 'Un articolo in affitto. Fornisci maggiori dettagli.')}
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                    {language === 'en' ? 'Category' : 'Categoria'}
+                  </div>
+                  <div className="inline-block px-3 py-1 bg-primary-500/20 border border-primary-500/30 rounded-lg">
+                    <span className="text-primary-400 font-semibold text-sm">
+                      {aiSuggestion.category || 'Electronics'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4 border-t border-primary-500/20">
                 <button
                   type="button"
                   onClick={acceptAiSuggestion}
-                  className="flex-1 bg-primary-500 text-[#0a0a0f] px-4 py-2 rounded-xl hover:bg-primary-400 transition-all font-black"
+                  className="flex-1 bg-primary-500 text-[#0a0a0f] px-4 py-3 rounded-xl hover:bg-primary-400 transition-all font-black text-sm"
                 >
-                  {language === 'en' ? 'Accept' : 'Accetta'}
+                  {language === 'en' ? 'Accept Suggestion' : 'Accetta Suggerimento'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setAiSuggestion(null)}
-                  className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition-all font-black"
+                  className="flex-1 bg-gray-700/50 text-gray-300 px-4 py-3 rounded-xl hover:bg-gray-700 transition-all font-black text-sm border border-gray-600/50"
                 >
                   {language === 'en' ? 'Dismiss' : 'Rifiuta'}
                 </button>
