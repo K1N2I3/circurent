@@ -53,10 +53,12 @@ function DashboardContent() {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/');
-      router.refresh();
+      // Force redirect to home page
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
+      // Even if API call fails, redirect to home
+      window.location.href = '/';
     }
   };
 

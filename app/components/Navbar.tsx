@@ -40,10 +40,12 @@ export default function Navbar() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       setIsLoggedIn(false);
-      router.push('/');
-      router.refresh();
+      // Force redirect to home page and refresh
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
+      // Even if API call fails, redirect to home
+      window.location.href = '/';
     }
   };
 
