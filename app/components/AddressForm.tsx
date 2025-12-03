@@ -14,12 +14,13 @@ export interface AddressData {
 interface AddressFormProps {
   value: AddressData;
   onChange: (address: AddressData) => void;
+  onValidationChange?: (isValid: boolean) => void;
   required?: boolean;
 }
 
 type ValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
 
-export default function AddressForm({ value, onChange, required = false }: AddressFormProps) {
+export default function AddressForm({ value, onChange, onValidationChange, required = false }: AddressFormProps) {
   const { language } = useLanguage();
   const [validationStatus, setValidationStatus] = useState<ValidationStatus>('idle');
   const [validationMessage, setValidationMessage] = useState<string>('');
@@ -117,31 +118,49 @@ export default function AddressForm({ value, onChange, required = false }: Addre
           
           setValidationStatus('valid');
           setValidationMessage(language === 'en' 
-            ? '✓ Address verified' 
-            : '✓ Indirizzo verificato');
+            ? 'Address verified' 
+            : 'Indirizzo verificato');
+          
+          // Notify parent component that address is valid
+          if (onValidationChange) {
+            onValidationChange(true);
+          }
         } else {
           setValidationStatus('invalid');
           setValidationMessage(language === 'en' 
-            ? 'Address not found. Please check and try again.' 
-            : 'Indirizzo non trovato. Controlla e riprova.');
+            ? 'Invalid address' 
+            : 'Indirizzo non valido');
+          
+          // Notify parent component that address is invalid
+          if (onValidationChange) {
+            onValidationChange(false);
+          }
         }
       } else {
         setValidationStatus('invalid');
         setValidationMessage(language === 'en' 
-          ? 'Validation service unavailable. Please try again later.' 
-          : 'Servizio di validazione non disponibile. Riprova più tardi.');
+          ? 'Invalid address' 
+          : 'Indirizzo non valido');
+        
+        if (onValidationChange) {
+          onValidationChange(false);
+        }
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
         setValidationStatus('invalid');
         setValidationMessage(language === 'en' 
-          ? 'Validation timeout. Please try again.' 
-          : 'Timeout di validazione. Riprova.');
+          ? 'Invalid address' 
+          : 'Indirizzo non valido');
       } else {
         setValidationStatus('invalid');
         setValidationMessage(language === 'en' 
-          ? 'Unable to validate address. You can still proceed.' 
-          : 'Impossibile validare l\'indirizzo. Puoi comunque procedere.');
+          ? 'Invalid address' 
+          : 'Indirizzo non valido');
+      }
+      
+      if (onValidationChange) {
+        onValidationChange(false);
       }
     }
   };
@@ -189,6 +208,42 @@ export default function AddressForm({ value, onChange, required = false }: Addre
 
   return (
     <div className="space-y-5">
+      {/* Address Validation Status - Display at top */}
+      {validationStatus !== 'idle' && (
+        <div className={`rounded-2xl p-4 border-2 transition-all ${
+          validationStatus === 'validating' 
+            ? 'bg-blue-500/10 border-blue-500/30' 
+            : validationStatus === 'valid'
+            ? 'bg-green-500/10 border-green-500/30'
+            : 'bg-red-500/10 border-red-500/30'
+        }`}>
+          <div className="flex items-center gap-3">
+            {validationStatus === 'validating' && (
+              <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+            )}
+            {validationStatus === 'valid' && (
+              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                <span className="text-white text-xs font-black">✓</span>
+              </div>
+            )}
+            {validationStatus === 'invalid' && (
+              <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                <span className="text-white text-xs font-black">✗</span>
+              </div>
+            )}
+            <p className={`text-sm font-semibold ${
+              validationStatus === 'validating' 
+                ? 'text-blue-400' 
+                : validationStatus === 'valid'
+                ? 'text-green-400'
+                : 'text-red-400'
+            }`}>
+              {validationMessage}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Country */}
       <div>
         <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider">
@@ -272,59 +327,6 @@ export default function AddressForm({ value, onChange, required = false }: Addre
         />
       </div>
 
-      {/* Address Validation Status */}
-      {validationStatus !== 'idle' && (
-        <div className={`rounded-2xl p-4 border-2 transition-all ${
-          validationStatus === 'validating' 
-            ? 'bg-blue-500/10 border-blue-500/30' 
-            : validationStatus === 'valid'
-            ? 'bg-green-500/10 border-green-500/30'
-            : 'bg-red-500/10 border-red-500/30'
-        }`}>
-          <div className="flex items-center gap-3">
-            {validationStatus === 'validating' && (
-              <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-            )}
-            {validationStatus === 'valid' && (
-              <span className="text-2xl">✓</span>
-            )}
-            {validationStatus === 'invalid' && (
-              <span className="text-2xl">✗</span>
-            )}
-            <div className="flex-1">
-              <p className={`text-sm font-semibold ${
-                validationStatus === 'validating' 
-                  ? 'text-blue-400' 
-                  : validationStatus === 'valid'
-                  ? 'text-green-400'
-                  : 'text-red-400'
-              }`}>
-                {validationMessage}
-              </p>
-            </div>
-            {validationStatus === 'invalid' && (
-              <button
-                type="button"
-                onClick={validateAddress}
-                className="px-4 py-2 bg-primary-500/20 border border-primary-500/30 text-primary-400 rounded-xl hover:bg-primary-500/30 transition-all text-sm font-bold"
-              >
-                {language === 'en' ? 'Retry' : 'Riprova'}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Manual Validation Button */}
-      {validationStatus === 'idle' && value.street.trim() && value.city.trim() && value.country && (
-        <button
-          type="button"
-          onClick={validateAddress}
-          className="w-full py-4 px-5 bg-primary-500/10 border-2 border-primary-500/30 text-primary-400 rounded-2xl hover:bg-primary-500/20 transition-all font-bold text-sm uppercase tracking-wider"
-        >
-          {language === 'en' ? '✓ Verify Address' : '✓ Verifica Indirizzo'}
-        </button>
-      )}
     </div>
   );
 }

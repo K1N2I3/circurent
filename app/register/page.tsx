@@ -29,6 +29,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [addressValid, setAddressValid] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -88,6 +89,12 @@ export default function RegisterPage() {
 
     if (!formData.address.country.trim()) {
       setError(language === 'en' ? 'Please select your country' : 'Seleziona il tuo paese');
+      return;
+    }
+
+    // Only proceed if address is validated
+    if (!addressValid) {
+      setError(language === 'en' ? 'Please wait for address validation' : 'Attendi la validazione dell\'indirizzo');
       return;
     }
 
@@ -330,7 +337,14 @@ export default function RegisterPage() {
               <div className="animate-fade-in">
                 <AddressForm
                   value={formData.address}
-                  onChange={(address) => setFormData({ ...formData, address })}
+                  onChange={(address) => {
+                    setFormData({ ...formData, address });
+                    // Reset validation when address changes
+                    setAddressValid(false);
+                  }}
+                  onValidationChange={(isValid) => {
+                    setAddressValid(isValid);
+                  }}
                   required
                 />
               </div>
@@ -338,19 +352,29 @@ export default function RegisterPage() {
               <div className="flex gap-4 mt-8 relative z-10">
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => {
+                    setStep(1);
+                    setAddressValid(false);
+                  }}
                   className="flex-1 py-5 px-4 glass border border-white/10 text-white rounded-2xl font-black text-lg hover:bg-white/10 transition-all"
                 >
                   ← {language === 'en' ? 'Back' : 'Indietro'}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-5 px-4 bg-primary-500 text-[#0a0a0f] rounded-2xl font-black text-lg hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all glow-green hover:glow-green-strong transform hover:scale-[1.02] relative overflow-hidden group"
+                  disabled={!addressValid}
+                  className={`flex-1 py-5 px-4 rounded-2xl font-black text-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all relative overflow-hidden group ${
+                    addressValid
+                      ? 'bg-primary-500 text-[#0a0a0f] hover:bg-primary-400 glow-green hover:glow-green-strong transform hover:scale-[1.02]'
+                      : 'bg-gray-600/30 text-gray-500 cursor-not-allowed opacity-50'
+                  }`}
                 >
                   <span className="relative z-10">
                     {language === 'en' ? 'Next Step' : 'Passo Successivo'} →
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  {addressValid && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  )}
                 </button>
               </div>
             </div>
