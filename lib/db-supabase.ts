@@ -71,6 +71,12 @@ export const itemsDbSupabase = {
     return data ? convertItemFromDb(data) : undefined;
   },
 
+  create: async (item: Item): Promise<void> => {
+    if (!useSupabase || !supabaseAdmin) throw new Error('Supabase not configured');
+    const { error } = await supabaseAdmin.from('items').insert(convertItemToDb(item));
+    if (error) throw error;
+  },
+
   update: async (id: string, updates: Partial<Item>): Promise<void> => {
     if (!useSupabase || !supabaseAdmin) throw new Error('Supabase not configured');
     const updateData: any = {};
@@ -82,6 +88,7 @@ export const itemsDbSupabase = {
     if (updates.imageUrl !== undefined) updateData.image_url = updates.imageUrl;
     if (updates.available !== undefined) updateData.available = updates.available;
     if (updates.ownerName !== undefined) updateData.owner_name = updates.ownerName;
+    if (updates.userId !== undefined) updateData.user_id = updates.userId;
     
     const { error } = await supabaseAdmin.from('items').update(updateData).eq('id', id);
     if (error) throw error;
@@ -194,6 +201,7 @@ function convertItemFromDb(dbItem: any): Item {
     imageUrl: dbItem.image_url || undefined,
     available: dbItem.available,
     ownerName: dbItem.owner_name || dbItem.location || 'CircuRent', // Support both old and new field names
+    userId: dbItem.user_id || undefined,
   };
 }
 
@@ -208,6 +216,7 @@ function convertItemToDb(item: Item): any {
     image_url: item.imageUrl || null,
     available: item.available,
     owner_name: item.ownerName, // Use owner_name in database
+    user_id: item.userId || null,
   };
 }
 

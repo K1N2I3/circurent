@@ -65,6 +65,7 @@ export interface Item {
   imageUrl?: string; // actual image URL
   available: boolean;
   ownerName: string; // Name of the person renting out this item
+  userId?: string; // ID of the user who owns this item (for user-created items)
 }
 
 export interface Rental {
@@ -144,6 +145,16 @@ export const itemsDb = {
     }
     const items = readData<Item[]>(itemsFile, []);
     return items.find(i => i.id === id);
+  },
+
+  create: async (item: Item): Promise<void> => {
+    if (useSupabase) {
+      await itemsDbSupabase.create(item);
+      return;
+    }
+    const items = readData<Item[]>(itemsFile, []);
+    items.push(item);
+    writeData(itemsFile, items);
   },
 
   update: async (id: string, updates: Partial<Item>): Promise<void> => {
