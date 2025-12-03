@@ -101,16 +101,9 @@ export default function RegisterPage() {
     setStep(3);
   };
 
-  const handleStep3 = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!emailVerified) {
-      setError(language === 'en' ? 'Please verify your email first' : 'Verifica prima la tua email');
-      return;
-    }
-
+  const handleCompleteRegistration = async () => {
     setLoading(true);
+    setError('');
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -130,14 +123,14 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         setError(data.error || t.auth.registerError);
+        setLoading(false);
         return;
       }
 
-      router.push('/');
-      router.refresh();
+      // Registration successful - redirect to home
+      window.location.href = '/';
     } catch (error) {
       setError(t.common.error);
-    } finally {
       setLoading(false);
     }
   };
@@ -210,7 +203,7 @@ export default function RegisterPage() {
 
         <form
           className="glass rounded-3xl p-10 border border-white/10 shadow-2xl backdrop-blur-xl animate-scale-in"
-          onSubmit={step === 1 ? handleStep1 : step === 2 ? handleStep2 : handleStep3}
+          onSubmit={step === 1 ? handleStep1 : step === 2 ? handleStep2 : (e) => e.preventDefault()}
         >
           {error && (
             <div className="bg-red-500/20 border-2 border-red-500/50 text-red-400 px-5 py-4 rounded-2xl mb-6">
