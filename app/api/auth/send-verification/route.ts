@@ -54,7 +54,8 @@ async function sendVerificationEmail(email: string, code: string): Promise<boole
       const resend = new Resend(resendApiKey);
       
       try {
-        const fromEmail = process.env.RESEND_FROM_EMAIL || 'CircuRent <onboarding@resend.dev>';
+        // Use verified domain if available, otherwise fallback to onboarding email
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'CircuRent <noreply@circurent.it>';
         
         console.log(`📤 Attempting to send email via Resend...`);
         console.log(`   To: ${email}`);
