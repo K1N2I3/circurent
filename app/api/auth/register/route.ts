@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       email,
       password: hashedPassword,
       name,
-      address: address || '',
+      address: address || undefined, // AddressData object or undefined
       createdAt: new Date().toISOString(),
     };
 
