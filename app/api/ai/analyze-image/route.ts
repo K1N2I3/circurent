@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-// Analyze image and generate description using AI
+// Analyze image and generate description using Claude API
 export async function POST(request: NextRequest) {
   try {
     const { imageUrl } = await request.json();
@@ -14,10 +14,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if OpenAI API key is configured
-    const openaiApiKey = process.env.OPENAI_API_KEY;
+    // Check if Anthropic API key is configured
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
     
-    if (!openaiApiKey) {
+    if (!anthropicApiKey) {
       // Fallback: Return a generic description
       return NextResponse.json({
         name: 'Item',
@@ -26,15 +26,54 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Use OpenAI Vision API to analyze the image
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Determine image format and prepare content
+    let imageContent: any;
+    
+    // Check if imageUrl is a base64 data URL
+    if (imageUrl.startsWith('data:image/')) {
+      // Extract base64 data and media type
+      const matches = imageUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (matches) {
+        const mediaType = matches[1];
+        const base64Data = matches[2];
+        imageContent = {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: `image/${mediaType}`,
+            data: base64Data,
+          },
+        };
+      } else {
+        // Fallback for invalid base64 format
+        return NextResponse.json({
+          name: 'Item',
+          description: 'A rental item. Please provide more details.',
+          category: 'Electronics',
+        });
+      }
+    } else {
+      // Assume it's a URL (must be publicly accessible)
+      imageContent = {
+        type: 'image',
+        source: {
+          type: 'url',
+          url: imageUrl,
+        },
+      };
+    }
+
+    // Use Claude API to analyze the image
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
+        'x-api-key': anthropicApiKey,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
         messages: [
           {
             role: 'user',
@@ -43,22 +82,16 @@ export async function POST(request: NextRequest) {
                 type: 'text',
                 text: 'Analyze this image and provide: 1) A short name for the item (max 50 chars), 2) A detailed description suitable for a rental marketplace (2-3 sentences), 3) The category (one of: Electronics, Sports Equipment, Outdoor Gear, Tools, Instruments, Vehicles). Respond in JSON format: {"name": "...", "description": "...", "category": "..."}'
               },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl
-                }
-              }
-            ]
-          }
+              imageContent
+            ],
+          },
         ],
-        max_tokens: 300,
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('OpenAI API error:', error);
+      console.error('Claude API error:', error);
       // Fallback response
       return NextResponse.json({
         name: 'Item',
@@ -68,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    const content = data.choices[0]?.message?.content || '';
+    const content = data.content?.[0]?.text || '';
 
     // Try to parse JSON from the response
     try {
