@@ -16,6 +16,7 @@ export default function EmailVerification({ email, onVerify, onComplete }: Email
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [error, setError] = useState('');
   const verifyingRef = useRef(false);
 
@@ -88,13 +89,14 @@ export default function EmailVerification({ email, onVerify, onComplete }: Email
       }
 
       // Verification successful
+      setVerified(true);
       onVerify(true);
       
-      // Auto-complete registration after short delay
+      // Auto-complete registration and redirect after short delay
       if (onComplete) {
         setTimeout(() => {
           onComplete();
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       setError(language === 'en' ? 'Verification failed. Resending...' : 'Verifica fallita. Reinvio...');
@@ -135,9 +137,16 @@ export default function EmailVerification({ email, onVerify, onComplete }: Email
         </div>
       )}
 
-      {loading && (
-        <div className="bg-blue-500/10 border border-blue-500/30 text-blue-400 px-4 py-3 rounded-xl text-sm text-center">
-          {language === 'en' ? 'Verifying...' : 'Verifica in corso...'}
+      {(loading || verified) && (
+        <div className={`px-4 py-3 rounded-xl text-sm text-center ${
+          verified 
+            ? 'bg-green-500/10 border border-green-500/30 text-green-400' 
+            : 'bg-blue-500/10 border border-blue-500/30 text-blue-400'
+        }`}>
+          {verified 
+            ? (language === 'en' ? 'Verified' : 'Verificato')
+            : (language === 'en' ? 'Verifying...' : 'Verifica in corso...')
+          }
         </div>
       )}
 
@@ -150,11 +159,15 @@ export default function EmailVerification({ email, onVerify, onComplete }: Email
             setCode(value);
             setError('');
           }}
-          className="w-full px-6 py-5 bg-[#0a0a0f] border-2 border-white/10 rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 transition-all text-center text-3xl font-black tracking-[0.5em] group-hover:border-white/20"
+          className={`w-full px-6 py-5 bg-[#0a0a0f] border-2 rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 transition-all text-center text-3xl font-black tracking-[0.5em] group-hover:border-white/20 ${
+            verified 
+              ? 'border-green-500/50 focus:ring-green-500 focus:border-green-500/50' 
+              : 'border-white/10 focus:ring-primary-500 focus:border-primary-500/50'
+          }`}
           placeholder="000000"
           maxLength={6}
           autoFocus
-          disabled={loading || sending}
+          disabled={loading || sending || verified}
         />
       </div>
     </div>
