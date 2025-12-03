@@ -96,7 +96,12 @@ export default function EmailVerification({ email, onVerify, onComplete }: Email
       if (onComplete) {
         setTimeout(() => {
           onComplete();
-        }, 1000);
+        }, 800);
+      } else {
+        // If no onComplete callback, redirect directly to home
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 800);
       }
     } catch (error) {
       setError(language === 'en' ? 'Verification failed. Resending...' : 'Verifica fallita. Reinvio...');

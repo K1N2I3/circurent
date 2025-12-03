@@ -500,38 +500,11 @@ export default function RegisterPage() {
               </div>
 
               <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <EmailVerification email={formData.email} onVerify={setEmailVerified} />
-              </div>
-
-              {emailVerified && (
-                <div className="animate-fade-in bg-primary-500/10 border-2 border-primary-500/30 rounded-2xl p-5 text-center">
-                  <div className="flex items-center justify-center gap-3 text-primary-400">
-                    <span className="text-2xl">✅</span>
-                    <span className="font-black text-lg">
-                      {language === 'en' ? 'Email verified! You can now complete registration.' : 'Email verificata! Ora puoi completare la registrazione.'}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-4 mt-10">
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  className="flex-1 py-5 px-4 glass border border-white/10 text-white rounded-2xl font-black text-lg hover:bg-white/10 transition-all"
-                >
-                  ← {language === 'en' ? 'Back' : 'Indietro'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading || !emailVerified}
-                  className="flex-1 py-5 px-4 bg-primary-500 text-[#0a0a0f] rounded-2xl font-black text-lg hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all glow-green hover:glow-green-strong transform hover:scale-[1.02] relative overflow-hidden group"
-                >
-                  <span className="relative z-10">
-                    {loading ? t.common.loading : t.auth.registerButton}
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                </button>
+                <EmailVerification 
+                  email={formData.email} 
+                  onVerify={setEmailVerified} 
+                  onComplete={handleCompleteRegistration}
+                />
               </div>
             </div>
           )}
