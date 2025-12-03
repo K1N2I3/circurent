@@ -73,18 +73,6 @@ export default function Navbar() {
             >
               {t.nav.home}
             </Link>
-            <Link 
-              href="/" 
-              className="text-white/90 hover:text-primary-400 transition-colors font-bold text-sm uppercase tracking-widest"
-            >
-              Items
-            </Link>
-            <Link 
-              href="/" 
-              className="text-white/90 hover:text-primary-400 transition-colors font-bold text-sm uppercase tracking-widest"
-            >
-              Services
-            </Link>
           </div>
 
           {/* Right Side */}
