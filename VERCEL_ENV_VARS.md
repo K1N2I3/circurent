@@ -41,12 +41,12 @@ RESEND_FROM_EMAIL
 **获取方式**: 
 - API Key: https://resend.com/api-keys
 - From Email: 
-  - ✅ **已验证域名**: `CircuRent <noreply@circurent.it>`（可发送到任何邮箱）
+  - ✅ **已验证域名**: `CircuRent <noreply@noreply.circurent.it>`（可发送到任何邮箱）
   - 测试: `CircuRent <onboarding@resend.dev>`（只能发送到注册邮箱）
 
 **当前配置**:
-- 域名: `circurent.it` ✅ 已验证
-- 发送地址: `noreply@circurent.it`
+- 已验证的域名: `noreply.circurent.it` (子域名) ✅ 已验证
+- 发送地址: `noreply@noreply.circurent.it` (必须匹配已验证的子域名)
 
 ---
 

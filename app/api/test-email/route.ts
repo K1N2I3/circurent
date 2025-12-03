@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
     }
 
     const resendApiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'CircuRent <noreply@circurent.it>';
+    // Note: Verified domain is noreply.circurent.it (subdomain)
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'CircuRent <noreply@noreply.circurent.it>';
 
     if (!resendApiKey) {
       return NextResponse.json(

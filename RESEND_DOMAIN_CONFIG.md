@@ -3,9 +3,11 @@
 ## ✅ 您的域名已验证
 
 根据您的 Resend Dashboard，您已经成功验证了域名：
-- **域名**: `circurent.it`
-- **发送地址**: `noreply@circurent.it`
+- **已验证的域名**: `noreply.circurent.it` (子域名)
 - **状态**: ✅ Verified (已验证)
+- **区域**: Ireland (eu-west-1)
+
+**重要**: 由于验证的是子域名 `noreply.circurent.it`，发送地址应该使用该子域名。
 
 ## 🔧 配置步骤
 
@@ -15,8 +17,10 @@
 
 ```env
 RESEND_API_KEY=re_AcovjuaR_5JpoEbpeGfiDpGgQS6vDrLyg
-RESEND_FROM_EMAIL=CircuRent <noreply@circurent.it>
+RESEND_FROM_EMAIL=CircuRent <noreply@noreply.circurent.it>
 ```
+
+**注意**: 由于验证的是子域名 `noreply.circurent.it`，发送地址必须使用该子域名格式。
 
 ### 2. 在 Vercel 中配置环境变量
 
@@ -25,7 +29,9 @@ RESEND_FROM_EMAIL=CircuRent <noreply@circurent.it>
 3. 进入 **Settings** → **Environment Variables**
 4. 添加或更新以下变量：
    - `RESEND_API_KEY`: `re_AcovjuaR_5JpoEbpeGfiDpGgQS6vDrLyg`
-   - `RESEND_FROM_EMAIL`: `CircuRent <noreply@circurent.it>`
+   - `RESEND_FROM_EMAIL`: `CircuRent <noreply@noreply.circurent.it>`
+   
+   **重要**: 必须使用 `noreply@noreply.circurent.it`（匹配已验证的子域名）
 
 ### 3. 重新部署
 
@@ -35,7 +41,7 @@ RESEND_FROM_EMAIL=CircuRent <noreply@circurent.it>
 
 使用已验证的域名后，邮件将从以下地址发送：
 - **发送者名称**: CircuRent
-- **发送者邮箱**: noreply@circurent.it
+- **发送者邮箱**: noreply@noreply.circurent.it（使用已验证的子域名）
 - **收件人**: 任何邮箱地址（不再限制为 hudefei1979@gmail.com）
 
 ## ✅ 验证配置

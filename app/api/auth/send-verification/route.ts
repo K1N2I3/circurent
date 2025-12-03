@@ -55,7 +55,8 @@ async function sendVerificationEmail(email: string, code: string): Promise<boole
       
       try {
         // Use verified domain if available, otherwise fallback to onboarding email
-        const fromEmail = process.env.RESEND_FROM_EMAIL || 'CircuRent <noreply@circurent.it>';
+        // Note: Verified domain is noreply.circurent.it (subdomain)
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'CircuRent <noreply@noreply.circurent.it>';
         
         console.log(`📤 Attempting to send email via Resend...`);
         console.log(`   To: ${email}`);
