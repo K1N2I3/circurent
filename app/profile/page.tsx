@@ -5,7 +5,20 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '../contexts/LanguageContext';
 import UserAvatar from '../components/UserAvatar';
-import { User } from '@/lib/db';
+import { User, AddressData } from '@/lib/db';
+
+// Type guard function
+function isAddressData(address: any): address is AddressData {
+  return (
+    address &&
+    typeof address === 'object' &&
+    'street' in address &&
+    'city' in address &&
+    'state' in address &&
+    'postalCode' in address &&
+    'country' in address
+  );
+}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -89,7 +102,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="text-white font-semibold text-lg">
                   {user.address ? (
-                    typeof user.address === 'object' && 'street' in user.address ? (
+                    isAddressData(user.address) ? (
                       <div className="space-y-1">
                         <div>{user.address.street}</div>
                         <div className="text-gray-400 text-sm">
