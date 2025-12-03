@@ -47,7 +47,10 @@ export default function Home() {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch('/api/items');
+      const response = await fetch('/api/items', {
+        cache: 'no-store',
+        next: { revalidate: 0 }
+      });
       const data = await response.json();
       setItems(data);
     } catch (error) {

@@ -40,7 +40,10 @@ export default function ItemDetailPage() {
 
   const fetchItem = async () => {
     try {
-      const response = await fetch(`/api/items/${params.id}`);
+      const response = await fetch(`/api/items/${params.id}`, {
+        cache: 'no-store',
+        next: { revalidate: 0 }
+      });
       if (!response.ok) {
         router.push('/');
         return;
