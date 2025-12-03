@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { itemsDb, usersDb } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, category, pricePerDay, imageUrl, available = true } = body;
+    let { name, description, category, pricePerDay, imageUrl, available = true } = body;
 
     // Validation
     if (!name || !description || !category || !pricePerDay) {
@@ -33,6 +34,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If imageUrl is base64, try to upload it to Supabase Storage
+    if (imageUrl && imageUrl.startsWith('data:image/') && supabaseAdmin) {
+      try {
+        const matches = imageUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (matches) {
+          const [, imageType, base64Data] = matches;
+          const imageBuffer = Buffer.from(base64Data, 'base64');
+          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${imageType}`;
+          const filePath = `item-images/${filename}`;
+
+          const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+            .from('item-images')
+            .upload(filePath, imageBuffer, {
+              contentType: `image/${imageType}`,
+              upsert: false,
+            });
+
+          if (!uploadError && uploadData) {
+            const { data: urlData } = supabaseAdmin.storage
+              .from('item-images')
+              .getPublicUrl(filePath);
+            imageUrl = urlData.publicUrl;
+          } else {
+            console.warn('Image upload failed, using base64:', uploadError);
+            // Continue with base64 if upload fails
+          }
+        }
+      } catch (uploadError) {
+        console.warn('Image upload error, using base64:', uploadError);
+        // Continue with base64 if upload fails
+      }
+    }
+
     // Get user data for ownerName
     const userData = await usersDb.getById(user.userId);
     if (!userData) {
@@ -45,9 +79,9 @@ export async function POST(request: NextRequest) {
     // Create new item
     const newItem = {
       id: Date.now().toString(),
-      name,
-      description,
-      category,
+      name: name.trim(),
+      description: description.trim(),
+      category: category.trim(),
       pricePerDay: Number(pricePerDay),
       image: '📦', // Default emoji
       imageUrl: imageUrl || undefined,
@@ -62,10 +96,28 @@ export async function POST(request: NextRequest) {
       { message: 'Item created successfully', item: newItem },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating item:', error);
+    
+    // Provide more detailed error message
+    let errorMessage = 'Failed to create item';
+    if (error?.message) {
+      errorMessage = error.message;
+    } else if (error?.code) {
+      // Supabase specific errors
+      if (error.code === '23505') {
+        errorMessage = 'Item with this ID already exists';
+      } else if (error.code === '23503') {
+        errorMessage = 'Invalid user reference';
+      } else if (error.code === '23502') {
+        errorMessage = 'Missing required field';
+      } else {
+        errorMessage = `Database error: ${error.code}`;
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to create item' },
+      { error: errorMessage, details: error?.message || error?.code || 'Unknown error' },
       { status: 500 }
     );
   }

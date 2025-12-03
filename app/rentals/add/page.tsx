@@ -113,7 +113,10 @@ export default function AddItemPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || (language === 'en' ? 'Failed to create item' : 'Creazione articolo fallita'));
+        // Show detailed error message
+        const errorMsg = data.error || (language === 'en' ? 'Failed to create item' : 'Creazione articolo fallita');
+        const details = data.details ? ` (${data.details})` : '';
+        setError(`${errorMsg}${details}`);
         setLoading(false);
         return;
       }
