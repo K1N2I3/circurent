@@ -78,14 +78,14 @@ export const usersDb = {
     if (useSupabase) {
       return await usersDbSupabase.getAll();
     }
-    return readData(usersFile, []);
+    return readData<User[]>(usersFile, []);
   },
 
   getById: async (id: string): Promise<User | undefined> => {
     if (useSupabase) {
       return await usersDbSupabase.getById(id);
     }
-    const users = readData(usersFile, []);
+    const users = readData<User[]>(usersFile, []);
     return users.find(u => u.id === id);
   },
 
@@ -93,7 +93,7 @@ export const usersDb = {
     if (useSupabase) {
       return await usersDbSupabase.getByEmail(email);
     }
-    const users = readData(usersFile, []);
+    const users = readData<User[]>(usersFile, []);
     return users.find(u => u.email === email);
   },
 
@@ -102,7 +102,7 @@ export const usersDb = {
       await usersDbSupabase.create(user);
       return;
     }
-    const users = readData(usersFile, []);
+    const users = readData<User[]>(usersFile, []);
     users.push(user);
     writeData(usersFile, users);
   },
@@ -112,7 +112,7 @@ export const usersDb = {
       await usersDbSupabase.update(id, updates);
       return;
     }
-    const users = readData(usersFile, []);
+    const users = readData<User[]>(usersFile, []);
     const index = users.findIndex(u => u.id === id);
     if (index !== -1) {
       users[index] = { ...users[index], ...updates };
@@ -127,14 +127,14 @@ export const itemsDb = {
     if (useSupabase) {
       return await itemsDbSupabase.getAll();
     }
-    return readData(itemsFile, []);
+    return readData<Item[]>(itemsFile, []);
   },
 
   getById: async (id: string): Promise<Item | undefined> => {
     if (useSupabase) {
       return await itemsDbSupabase.getById(id);
     }
-    const items = readData(itemsFile, []);
+    const items = readData<Item[]>(itemsFile, []);
     return items.find(i => i.id === id);
   },
 
@@ -143,7 +143,7 @@ export const itemsDb = {
       await itemsDbSupabase.update(id, updates);
       return;
     }
-    const items = readData(itemsFile, []);
+    const items = readData<Item[]>(itemsFile, []);
     const index = items.findIndex(i => i.id === id);
     if (index !== -1) {
       items[index] = { ...items[index], ...updates };
@@ -158,14 +158,14 @@ export const rentalsDb = {
     if (useSupabase) {
       return await rentalsDbSupabase.getAll();
     }
-    return readData(rentalsFile, []);
+    return readData<Rental[]>(rentalsFile, []);
   },
 
   getById: async (id: string): Promise<Rental | undefined> => {
     if (useSupabase) {
       return await rentalsDbSupabase.getById(id);
     }
-    const rentals = readData(rentalsFile, []);
+    const rentals = readData<Rental[]>(rentalsFile, []);
     return rentals.find(r => r.id === id);
   },
 
@@ -173,7 +173,7 @@ export const rentalsDb = {
     if (useSupabase) {
       return await rentalsDbSupabase.getByUserId(userId);
     }
-    const rentals = readData(rentalsFile, []);
+    const rentals = readData<Rental[]>(rentalsFile, []);
     return rentals.filter(r => r.userId === userId);
   },
 
@@ -182,7 +182,7 @@ export const rentalsDb = {
       await rentalsDbSupabase.create(rental);
       return;
     }
-    const rentals = readData(rentalsFile, []);
+    const rentals = readData<Rental[]>(rentalsFile, []);
     rentals.push(rental);
     writeData(rentalsFile, rentals);
   },
@@ -192,7 +192,7 @@ export const rentalsDb = {
       await rentalsDbSupabase.update(id, updates);
       return;
     }
-    const rentals = readData(rentalsFile, []);
+    const rentals = readData<Rental[]>(rentalsFile, []);
     const index = rentals.findIndex(r => r.id === id);
     if (index !== -1) {
       rentals[index] = { ...rentals[index], ...updates };
