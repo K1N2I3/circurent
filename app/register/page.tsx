@@ -343,12 +343,12 @@ export default function RegisterPage() {
 
           {/* Step 3: Email Verification */}
           {step === 3 && (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-black text-white mb-2">
+            <div className="space-y-8">
+              <div className="text-center mb-8">
+                <h3 className="text-3xl font-black text-white mb-3">
                   {language === 'en' ? 'Step 3: Verify Your Email' : 'Passo 3: Verifica la Tua Email'}
                 </h3>
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-400 text-base">
                   {language === 'en' ? 'Please verify your email address to complete registration' : 'Verifica il tuo indirizzo email per completare la registrazione'}
                 </p>
               </div>
@@ -357,7 +357,18 @@ export default function RegisterPage() {
                 <EmailVerification email={formData.email} onVerify={setEmailVerified} />
               </div>
 
-              <div className="flex gap-4 mt-8">
+              {emailVerified && (
+                <div className="animate-fade-in bg-primary-500/10 border-2 border-primary-500/30 rounded-2xl p-5 text-center">
+                  <div className="flex items-center justify-center gap-3 text-primary-400">
+                    <span className="text-2xl">✅</span>
+                    <span className="font-black text-lg">
+                      {language === 'en' ? 'Email verified! You can now complete registration.' : 'Email verificata! Ora puoi completare la registrazione.'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-4 mt-10">
                 <button
                   type="button"
                   onClick={() => setStep(2)}
@@ -368,7 +379,7 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={loading || !emailVerified}
-                  className="flex-1 py-5 px-4 bg-primary-500 text-[#0a0a0f] rounded-2xl font-black text-lg hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 transition-all glow-green hover:glow-green-strong transform hover:scale-[1.02] relative overflow-hidden group"
+                  className="flex-1 py-5 px-4 bg-primary-500 text-[#0a0a0f] rounded-2xl font-black text-lg hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all glow-green hover:glow-green-strong transform hover:scale-[1.02] relative overflow-hidden group"
                 >
                   <span className="relative z-10">
                     {loading ? t.common.loading : t.auth.registerButton}
