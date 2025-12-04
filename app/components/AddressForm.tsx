@@ -40,6 +40,7 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
   };
 
   // Validate address using OpenStreetMap Nominatim API with retry mechanism
+  // More flexible validation - accepts partial matches
   const validateAddress = async (retryCount = 0) => {
     // Check if we have enough information to validate
     if (!value.street.trim() || !value.city.trim() || !value.country) {
@@ -54,128 +55,182 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
     setValidationMessage(language === 'en' ? 'Validating address...' : 'Validazione indirizzo...');
 
     try {
-      // Build address query
-      const addressQuery = [
-        value.street,
-        value.city,
-        value.state,
-        value.postalCode,
-        value.country,
-      ].filter(Boolean).join(', ');
+      // Build address query - try multiple variations for better matching
+      const addressQueries = [
+        // Full address
+        [value.street, value.city, value.state, value.postalCode, value.country].filter(Boolean).join(', '),
+        // Without postal code
+        [value.street, value.city, value.state, value.country].filter(Boolean).join(', '),
+        // Without state
+        [value.street, value.city, value.postalCode, value.country].filter(Boolean).join(', '),
+        // Just street, city, country
+        [value.street, value.city, value.country].filter(Boolean).join(', '),
+      ];
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      let foundMatch = false;
+      let bestMatch: any = null;
 
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressQuery)}&limit=1&addressdetails=1&accept-language=${language === 'en' ? 'en' : 'it'}`,
-        {
-          headers: {
-            'User-Agent': 'CircuRent/1.0',
-            'Accept': 'application/json',
-          },
-          signal: controller.signal,
+      // Try each query variation
+      for (const addressQuery of addressQueries) {
+        if (!addressQuery.trim()) continue;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressQuery)}&limit=5&addressdetails=1&accept-language=${language === 'en' ? 'en' : 'it'}`,
+            {
+              headers: {
+                'User-Agent': 'CircuRent/1.0',
+                'Accept': 'application/json',
+              },
+              signal: controller.signal,
+            }
+          );
+
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+              // Check if any result matches our address components
+              for (const result of data) {
+                const address = result.address || {};
+                const resultCity = (address.city || address.town || address.village || '').toLowerCase();
+                const resultCountry = (address.country_code || '').toLowerCase();
+                const inputCity = value.city.toLowerCase();
+                const inputCountry = value.country.toLowerCase();
+
+                // More flexible matching: check if city and country match (case-insensitive)
+                const cityMatches = resultCity.includes(inputCity) || inputCity.includes(resultCity);
+                const countryMatches = resultCountry === inputCountry || 
+                                     (inputCountry.length === 2 && resultCountry.startsWith(inputCountry));
+
+                if (cityMatches && countryMatches) {
+                  foundMatch = true;
+                  bestMatch = result;
+                  break;
+                }
+              }
+
+              if (foundMatch) break;
+            }
+          } else if (response.status === 429 && retryCount < 1) {
+            // Rate limited, retry after delay
+            setTimeout(() => {
+              validateAddress(retryCount + 1);
+            }, 1000);
+            return;
+          }
+        } catch (fetchError: any) {
+          if (fetchError.name === 'AbortError') {
+            // Timeout, try next query
+            continue;
+          }
+          // Other errors, try next query
+          continue;
         }
-      );
+      }
 
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
+      if (foundMatch && bestMatch) {
+        // Address found - validate and optionally auto-fill missing fields
+        const address = bestMatch.address || {};
         
-        if (data && data.length > 0) {
-          // Address found - validate and optionally auto-fill missing fields
-          const result = data[0];
-          const address = result.address || {};
-          
-          // Auto-fill missing fields if available
-          const updatedAddress: AddressData = { ...value };
-          let hasUpdates = false;
-          
-          if (!updatedAddress.city && (address.city || address.town || address.village)) {
-            updatedAddress.city = address.city || address.town || address.village;
-            hasUpdates = true;
-          }
-          
-          if (!updatedAddress.state && (address.state || address.region || address.province)) {
-            updatedAddress.state = address.state || address.region || address.province;
-            hasUpdates = true;
-          }
-          
-          if (!updatedAddress.postalCode && address.postcode) {
-            updatedAddress.postalCode = address.postcode;
-            hasUpdates = true;
-          }
-          
-          if (!updatedAddress.country && address.country_code) {
-            const countryCode = address.country_code.toUpperCase();
-            updatedAddress.country = countryCode;
-            hasUpdates = true;
-          }
-          
-          if (hasUpdates) {
-            onChange(updatedAddress);
-          }
-          
+        // Auto-fill missing fields if available
+        const updatedAddress: AddressData = { ...value };
+        let hasUpdates = false;
+        
+        if (!updatedAddress.city && (address.city || address.town || address.village)) {
+          updatedAddress.city = address.city || address.town || address.village;
+          hasUpdates = true;
+        }
+        
+        if (!updatedAddress.state && (address.state || address.region || address.province)) {
+          updatedAddress.state = address.state || address.region || address.province;
+          hasUpdates = true;
+        }
+        
+        if (!updatedAddress.postalCode && address.postcode) {
+          updatedAddress.postalCode = address.postcode;
+          hasUpdates = true;
+        }
+        
+        if (!updatedAddress.country && address.country_code) {
+          const countryCode = address.country_code.toUpperCase();
+          updatedAddress.country = countryCode;
+          hasUpdates = true;
+        }
+        
+        if (hasUpdates) {
+          onChange(updatedAddress);
+        }
+        
+        setValidationStatus('valid');
+        setValidationMessage(language === 'en' 
+          ? 'Address verified' 
+          : 'Indirizzo verificato');
+        
+        // Notify parent component that address is valid
+        if (onValidationChange) {
+          onValidationChange(true);
+        }
+      } else {
+        // No exact match found, but if we have all required fields, accept it anyway
+        // This allows users to enter valid addresses that might not be in the database
+        if (value.street.trim().length >= 5 && 
+            value.city.trim().length >= 2 && 
+            value.country.length === 2) {
           setValidationStatus('valid');
           setValidationMessage(language === 'en' 
-            ? 'Address verified' 
-            : 'Indirizzo verificato');
+            ? 'Address format looks valid' 
+            : 'Formato indirizzo valido');
           
-          // Notify parent component that address is valid
           if (onValidationChange) {
             onValidationChange(true);
           }
         } else {
           setValidationStatus('invalid');
           setValidationMessage(language === 'en' 
-            ? 'Invalid address' 
-            : 'Indirizzo non valido');
+            ? 'Please check your address details' 
+            : 'Controlla i dettagli del tuo indirizzo');
           
-          // Notify parent component that address is invalid
           if (onValidationChange) {
             onValidationChange(false);
           }
         }
+      }
+    } catch (error: any) {
+      // If validation fails but we have required fields, accept it
+      if (value.street.trim().length >= 5 && 
+          value.city.trim().length >= 2 && 
+          value.country.length === 2) {
+        setValidationStatus('valid');
+        setValidationMessage(language === 'en' 
+          ? 'Address format looks valid' 
+          : 'Formato indirizzo valido');
+        
+        if (onValidationChange) {
+          onValidationChange(true);
+        }
       } else {
         // 添加重试机制（最多重试1次）
-        if (response.status === 429 && retryCount < 1) {
+        if (error.name !== 'AbortError' && retryCount < 1) {
           setTimeout(() => {
             validateAddress(retryCount + 1);
-          }, 1000);
+          }, 500);
           return;
         }
+        
         setValidationStatus('invalid');
         setValidationMessage(language === 'en' 
-          ? 'Invalid address' 
-          : 'Indirizzo non valido');
+          ? 'Please check your address details' 
+          : 'Controlla i dettagli del tuo indirizzo');
         
         if (onValidationChange) {
           onValidationChange(false);
         }
-      }
-    } catch (error: any) {
-      // 添加重试机制（最多重试1次）
-      if (error.name !== 'AbortError' && retryCount < 1) {
-        setTimeout(() => {
-          validateAddress(retryCount + 1);
-        }, 500);
-        return;
-      }
-      
-      if (error.name === 'AbortError') {
-        setValidationStatus('invalid');
-        setValidationMessage(language === 'en' 
-          ? 'Invalid address' 
-          : 'Indirizzo non valido');
-      } else {
-        setValidationStatus('invalid');
-        setValidationMessage(language === 'en' 
-          ? 'Invalid address' 
-          : 'Indirizzo non valido');
-      }
-      
-      if (onValidationChange) {
-        onValidationChange(false);
       }
     }
   };

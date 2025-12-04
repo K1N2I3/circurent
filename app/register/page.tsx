@@ -277,7 +277,9 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || t.auth.registerError);
+        // Show detailed error message
+        const errorMsg = data.error || data.message || t.auth.registerError;
+        setError(errorMsg);
         setLoading(false);
         return;
       }

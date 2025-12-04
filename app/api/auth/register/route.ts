@@ -57,7 +57,14 @@ export async function POST(request: NextRequest) {
     };
 
     await usersDb.create(newUser);
-    initItems();
+    
+    // Initialize items in background (don't fail registration if this fails)
+    try {
+      await initItems();
+    } catch (itemsError) {
+      // Log error but don't fail registration
+      console.error('Error initializing items (non-critical):', itemsError);
+    }
 
     const token = generateToken({ userId: newUser.id, email: newUser.email });
 
@@ -74,10 +81,22 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
+    
+    // Provide more detailed error messages
+    let errorMessage = 'Registration failed';
+    if (error?.message) {
+      errorMessage = error.message;
+    } else if (error?.code) {
+      errorMessage = `Database error: ${error.code}`;
+    }
+    
     return NextResponse.json(
-      { error: 'Registration failed' },
+      { 
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     );
   }
