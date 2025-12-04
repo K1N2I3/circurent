@@ -40,7 +40,7 @@ export default function AddressInputFree({ value, onChange, required = false }: 
     };
   }, []);
 
-  const fetchAddressSuggestions = async (inputValue: string) => {
+  const fetchAddressSuggestions = async (inputValue: string, retryCount = 0) => {
     if (inputValue.length < 3) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -56,7 +56,7 @@ export default function AddressInputFree({ value, onChange, required = false }: 
       // 使用免费的 OpenStreetMap Nominatim API
       // 添加延迟以避免请求太频繁（Nominatim 限制每秒 1 次请求）
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(inputValue)}&limit=3&addressdetails=1&accept-language=${language === 'en' ? 'en' : 'it'}`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(inputValue)}&limit=5&addressdetails=1&accept-language=${language === 'en' ? 'en' : 'it'}`,
         {
           headers: {
             'User-Agent': 'CircuRent/1.0', // Required by Nominatim
@@ -97,14 +97,28 @@ export default function AddressInputFree({ value, onChange, required = false }: 
           setShowSuggestions(false);
         }
       } else {
-        // 处理 HTTP 错误
+        // 处理 HTTP 错误，添加重试机制
         if (response.status === 429) {
+          // 如果请求太频繁，等待后重试（最多重试1次）
+          if (retryCount < 1) {
+            setTimeout(() => {
+              fetchAddressSuggestions(inputValue, retryCount + 1);
+            }, 1000);
+            return;
+          }
           console.warn('Too many requests to Nominatim. Please wait a moment.');
         }
         setSuggestions([]);
         setShowSuggestions(false);
       }
     } catch (error: any) {
+      // 添加重试机制（最多重试1次）
+      if (error.name !== 'AbortError' && error.name !== 'TimeoutError' && retryCount < 1) {
+        setTimeout(() => {
+          fetchAddressSuggestions(inputValue, retryCount + 1);
+        }, 500);
+        return;
+      }
       // 静默处理错误，避免控制台噪音
       if (error.name !== 'AbortError' && error.name !== 'TimeoutError') {
         // 只记录非超时错误
@@ -133,10 +147,21 @@ export default function AddressInputFree({ value, onChange, required = false }: 
       return;
     }
 
-    // 防抖：等待用户停止输入 500ms 后再发送请求
+    // 实时检测：减少防抖时间到 200ms，让检测更实时
     debounceTimerRef.current = setTimeout(() => {
       fetchAddressSuggestions(inputValue);
-    }, 500);
+    }, 200);
+  };
+
+  // 当输入框获得焦点时，如果已有内容，立即触发检测
+  const handleFocus = () => {
+    if (value.length >= 3 && suggestions.length === 0) {
+      // 如果输入框有内容但没有建议，立即触发检测
+      fetchAddressSuggestions(value);
+    } else if (suggestions.length > 0) {
+      // 如果已有建议，显示它们
+      setShowSuggestions(true);
+    }
   };
 
   const handleSelectSuggestion = (suggestion: any) => {
@@ -153,7 +178,7 @@ export default function AddressInputFree({ value, onChange, required = false }: 
           type="text"
           value={value}
           onChange={handleInputChange}
-          onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+          onFocus={handleFocus}
           required={required}
           className="w-full px-5 py-4 bg-[#0a0a0f] border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 transition-all group-hover:border-white/20"
           placeholder={language === 'en' ? 'Start typing your address...' : 'Inizia a digitare il tuo indirizzo...'}

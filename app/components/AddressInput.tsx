@@ -20,6 +20,7 @@ export default function AddressInput({ value, onChange, required = false }: Addr
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -34,13 +35,16 @@ export default function AddressInput({ value, onChange, required = false }: Addr
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      // 清理防抖定时器
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    onChange(inputValue);
-
+  const fetchAddressSuggestions = async (inputValue: string, retryCount = 0) => {
     if (inputValue.length < 3) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -63,12 +67,67 @@ export default function AddressInput({ value, onChange, required = false }: Addr
           }));
           setSuggestions(addresses);
           setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
         }
+      } else {
+        // 添加重试机制（最多重试1次）
+        if (retryCount < 1) {
+          setTimeout(() => {
+            fetchAddressSuggestions(inputValue, retryCount + 1);
+          }, 500);
+          return;
+        }
+        setSuggestions([]);
+        setShowSuggestions(false);
       }
     } catch (error) {
+      // 添加重试机制（最多重试1次）
+      if (retryCount < 1) {
+        setTimeout(() => {
+          fetchAddressSuggestions(inputValue, retryCount + 1);
+        }, 500);
+        return;
+      }
       console.error('Error fetching address suggestions:', error);
+      setSuggestions([]);
+      setShowSuggestions(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    onChange(inputValue);
+
+    // 清除之前的防抖定时器
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // 如果输入太短，立即清除建议
+    if (inputValue.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // 实时检测：减少防抖时间到 200ms，让检测更实时
+    debounceTimerRef.current = setTimeout(() => {
+      fetchAddressSuggestions(inputValue);
+    }, 200);
+  };
+
+  // 当输入框获得焦点时，如果已有内容，立即触发检测
+  const handleFocus = () => {
+    if (value.length >= 3 && suggestions.length === 0) {
+      // 如果输入框有内容但没有建议，立即触发检测
+      fetchAddressSuggestions(value);
+    } else if (suggestions.length > 0) {
+      // 如果已有建议，显示它们
+      setShowSuggestions(true);
     }
   };
 
@@ -86,7 +145,7 @@ export default function AddressInput({ value, onChange, required = false }: Addr
           type="text"
           value={value}
           onChange={handleInputChange}
-          onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+          onFocus={handleFocus}
           required={required}
           className="w-full px-5 py-4 bg-[#0a0a0f] border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 transition-all group-hover:border-white/20"
           placeholder={language === 'en' ? 'Start typing your address...' : 'Inizia a digitare il tuo indirizzo...'}

@@ -39,8 +39,8 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
     }
   };
 
-  // Validate address using OpenStreetMap Nominatim API
-  const validateAddress = async () => {
+  // Validate address using OpenStreetMap Nominatim API with retry mechanism
+  const validateAddress = async (retryCount = 0) => {
     // Check if we have enough information to validate
     if (!value.street.trim() || !value.city.trim() || !value.country) {
       setValidationStatus('invalid');
@@ -137,6 +137,13 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
           }
         }
       } else {
+        // 添加重试机制（最多重试1次）
+        if (response.status === 429 && retryCount < 1) {
+          setTimeout(() => {
+            validateAddress(retryCount + 1);
+          }, 1000);
+          return;
+        }
         setValidationStatus('invalid');
         setValidationMessage(language === 'en' 
           ? 'Invalid address' 
@@ -147,6 +154,14 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
         }
       }
     } catch (error: any) {
+      // 添加重试机制（最多重试1次）
+      if (error.name !== 'AbortError' && retryCount < 1) {
+        setTimeout(() => {
+          validateAddress(retryCount + 1);
+        }, 500);
+        return;
+      }
+      
       if (error.name === 'AbortError') {
         setValidationStatus('invalid');
         setValidationMessage(language === 'en' 
@@ -165,7 +180,7 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
     }
   };
 
-  // Auto-validate when user has filled enough fields (debounced)
+  // Auto-validate when user has filled enough fields (debounced, real-time)
   useEffect(() => {
     // Clear previous timer
     if (debounceTimerRef.current) {
@@ -173,15 +188,27 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
     }
 
     // Only auto-validate if we have enough information
-    const hasEnoughInfo = value.street.trim().length >= 5 && 
+    const hasEnoughInfo = value.street.trim().length >= 3 && 
                          value.city.trim().length >= 2 && 
                          value.country.length === 2;
 
-    if (hasEnoughInfo && validationStatus === 'idle') {
-      // Debounce: wait 2 seconds after user stops typing
-      debounceTimerRef.current = setTimeout(() => {
-        validateAddress();
-      }, 2000);
+    if (hasEnoughInfo) {
+      // 实时检测：减少防抖时间到 800ms，让检测更实时
+      // 如果正在验证中，不重复触发
+      if (validationStatus !== 'validating') {
+        debounceTimerRef.current = setTimeout(() => {
+          validateAddress();
+        }, 800);
+      }
+    } else {
+      // 如果信息不足，重置验证状态
+      if (validationStatus !== 'idle') {
+        setValidationStatus('idle');
+        setValidationMessage('');
+        if (onValidationChange) {
+          onValidationChange(false);
+        }
+      }
     }
 
     return () => {
@@ -189,7 +216,7 @@ export default function AddressForm({ value, onChange, onValidationChange, requi
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [value.street, value.city, value.country]);
+  }, [value.street, value.city, value.country, value.state, value.postalCode]);
 
   const countries = [
     { code: 'IT', name: language === 'en' ? 'Italy' : 'Italia' },
