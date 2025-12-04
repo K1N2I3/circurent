@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
     // Return user data without password
     return NextResponse.json({
       id: userData.id,
+      username: userData.username,
       email: userData.email,
       name: userData.name,
       address: userData.address,

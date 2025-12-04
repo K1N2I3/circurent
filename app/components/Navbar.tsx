@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import UserMenu from './UserMenu';
+import { getDisplayName } from '@/lib/db';
 
 interface User {
   id: string;
@@ -96,7 +97,7 @@ export default function Navbar() {
             {isLoggedIn && user ? (
               <>
                 <LanguageSwitcher />
-                <UserMenu userName={user.name} avatarUrl={user.avatarUrl} />
+                <UserMenu userName={getDisplayName(user)} avatarUrl={user.avatarUrl} />
               </>
             ) : (
               <>

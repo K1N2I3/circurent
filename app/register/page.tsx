@@ -14,7 +14,7 @@ export default function RegisterPage() {
   const { t, language } = useLanguage();
   const [step, setStep] = useState<Step>(1);
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     address: {
       street: '',
@@ -33,10 +33,66 @@ export default function RegisterPage() {
   const [mounted, setMounted] = useState(false);
   const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [emailMessage, setEmailMessage] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const [usernameMessage, setUsernameMessage] = useState('');
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-check username availability
+  useEffect(() => {
+    const checkUsername = async () => {
+      const username = formData.username.trim().toLowerCase();
+      
+      if (!username) {
+        setUsernameStatus('idle');
+        setUsernameMessage('');
+        return;
+      }
+
+      // Basic validation
+      const usernameRegex = /^[a-z0-9_]{3,20}$/;
+      if (!usernameRegex.test(username)) {
+        setUsernameStatus('invalid');
+        setUsernameMessage(language === 'en' 
+          ? 'Username must be 3-20 characters, only lowercase letters, numbers, and underscores'
+          : 'Il nome utente deve essere di 3-20 caratteri, solo lettere minuscole, numeri e underscore'
+        );
+        return;
+      }
+
+      setUsernameStatus('checking');
+      setUsernameMessage(language === 'en' ? 'Checking...' : 'Controllo...');
+
+      const timer = setTimeout(async () => {
+        try {
+          const response = await fetch('/api/auth/check-username', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username }),
+          });
+
+          const data = await response.json();
+
+          if (data.available) {
+            setUsernameStatus('available');
+            setUsernameMessage(language === 'en' ? '✓ Username available' : '✓ Nome utente disponibile');
+          } else {
+            setUsernameStatus('taken');
+            setUsernameMessage(language === 'en' ? '✗ Username taken' : '✗ Nome utente già utilizzato');
+          }
+        } catch (error) {
+          setUsernameStatus('idle');
+          setUsernameMessage('');
+        }
+      }, 800); // Wait 800ms after user stops typing
+
+      return () => clearTimeout(timer);
+    };
+
+    checkUsername();
+  }, [formData.username, language]);
 
   // Auto-check email availability
   useEffect(() => {
@@ -96,8 +152,35 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (!formData.name.trim()) {
-      setError(language === 'en' ? 'Please enter your name' : 'Inserisci il tuo nome');
+    if (!formData.username.trim()) {
+      setError(language === 'en' ? 'Please enter a username' : 'Inserisci un nome utente');
+      return;
+    }
+
+    // Check username validation
+    const trimmedUsername = formData.username.trim().toLowerCase();
+    const usernameRegex = /^[a-z0-9_]{3,20}$/;
+    if (!usernameRegex.test(trimmedUsername)) {
+      setError(language === 'en' 
+        ? 'Username must be 3-20 characters, only lowercase letters, numbers, and underscores'
+        : 'Il nome utente deve essere di 3-20 caratteri, solo lettere minuscole, numeri e underscore'
+      );
+      return;
+    }
+
+    // Check if username is being checked or already taken
+    if (usernameStatus === 'checking') {
+      setError(language === 'en' ? 'Please wait while we check your username' : 'Attendi mentre controlliamo il tuo nome utente');
+      return;
+    }
+
+    if (usernameStatus === 'taken' || usernameStatus === 'invalid') {
+      setError(usernameMessage);
+      return;
+    }
+
+    if (usernameStatus !== 'available') {
+      setError(language === 'en' ? 'Please wait for username verification' : 'Attendi la verifica del nome utente');
       return;
     }
 
@@ -184,7 +267,7 @@ export default function RegisterPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          username: formData.username.trim().toLowerCase(),
           email: formData.email,
           address: formData.address,
           password: formData.password,
@@ -291,26 +374,41 @@ export default function RegisterPage() {
                   {language === 'en' ? 'Step 1: Your Information' : 'Passo 1: Le Tue Informazioni'}
                 </h3>
                 <p className="text-gray-400 text-sm">
-                  {language === 'en' ? 'Let\'s start with your name, email and password' : 'Iniziamo con il tuo nome, email e password'}
+                  {language === 'en' ? 'Let\'s start with your username, email and password' : 'Iniziamo con il tuo nome utente, email e password'}
                 </p>
               </div>
 
               <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <label htmlFor="name" className="block text-sm font-black text-gray-300 mb-3 uppercase tracking-wider">
-                  {t.auth.name}
+                <label htmlFor="username" className="block text-sm font-black text-gray-300 mb-3 uppercase tracking-wider">
+                  {language === 'en' ? 'Username' : 'Nome Utente'} *
                 </label>
                 <div className="relative group">
                   <input
-                    id="name"
-                    name="name"
+                    id="username"
+                    name="username"
                     type="text"
                     required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                     className="w-full px-5 py-4 bg-[#0a0a0f] border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 transition-all group-hover:border-white/20"
-                    placeholder={t.auth.name}
+                    placeholder={language === 'en' ? 'username' : 'nomeutente'}
                   />
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary-500/0 via-primary-500/0 to-primary-500/0 group-hover:from-primary-500/5 group-hover:via-primary-500/10 group-hover:to-primary-500/5 transition-all pointer-events-none"></div>
+                  {usernameStatus !== 'idle' && (
+                    <div className={`mt-2 text-sm ${
+                      usernameStatus === 'available' ? 'text-green-400' :
+                      usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'text-red-400' :
+                      'text-gray-400'
+                    }`}>
+                      {usernameMessage}
+                    </div>
+                  )}
+                  <div className="mt-1 text-xs text-gray-500">
+                    {language === 'en' 
+                      ? '3-20 characters, lowercase letters, numbers, and underscores only'
+                      : '3-20 caratteri, solo lettere minuscole, numeri e underscore'
+                    }
+                  </div>
                 </div>
               </div>
 

@@ -17,7 +17,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { email, avatarUrl } = body;
+    const { email, avatarUrl, name } = body;
 
     const updates: any = {};
 
@@ -40,6 +40,11 @@ export async function PATCH(request: NextRequest) {
       }
       
       updates.email = email.trim();
+    }
+
+    // Update name if provided
+    if (name !== undefined) {
+      updates.name = name.trim() || null; // Allow empty string to clear name
     }
 
     // Update avatar if provided
@@ -97,6 +102,7 @@ export async function PATCH(request: NextRequest) {
     // Return updated user data without password
     return NextResponse.json({
       id: updatedUser.id,
+      username: updatedUser.username,
       email: updatedUser.email,
       name: updatedUser.name,
       address: updatedUser.address,

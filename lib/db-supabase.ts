@@ -33,6 +33,16 @@ export const usersDbSupabase = {
     return data ? convertUserFromDb(data) : undefined;
   },
 
+  getByUsername: async (username: string): Promise<User | undefined> => {
+    if (!useSupabase || !supabaseAdmin) throw new Error('Supabase not configured');
+    const { data, error } = await supabaseAdmin.from('users').select('*').eq('username', username).single();
+    if (error) {
+      if (error.code === 'PGRST116') return undefined; // Not found
+      throw error;
+    }
+    return data ? convertUserFromDb(data) : undefined;
+  },
+
   create: async (user: User): Promise<void> => {
     if (!useSupabase || !supabaseAdmin) throw new Error('Supabase not configured');
     const { error } = await supabaseAdmin.from('users').insert(convertUserToDb(user));
@@ -42,9 +52,10 @@ export const usersDbSupabase = {
   update: async (id: string, updates: Partial<User>): Promise<void> => {
     if (!useSupabase || !supabaseAdmin) throw new Error('Supabase not configured');
     const updateData: any = {};
+    if (updates.username !== undefined) updateData.username = updates.username;
     if (updates.email !== undefined) updateData.email = updates.email;
     if (updates.password !== undefined) updateData.password = updates.password;
-    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.name !== undefined) updateData.name = updates.name || null;
     if (updates.address !== undefined) updateData.address = updates.address;
     if (updates.avatarUrl !== undefined) updateData.avatar_url = updates.avatarUrl;
     
@@ -171,9 +182,10 @@ function convertUserFromDb(dbUser: any): User {
 
   return {
     id: dbUser.id,
+    username: dbUser.username || dbUser.name || `user_${dbUser.id}`, // Fallback for old data
     email: dbUser.email,
     password: dbUser.password,
-    name: dbUser.name,
+    name: dbUser.name || undefined, // name is now optional
     address,
     avatarUrl: dbUser.avatar_url || undefined,
     createdAt: dbUser.created_at,
@@ -183,9 +195,10 @@ function convertUserFromDb(dbUser: any): User {
 function convertUserToDb(user: User): any {
   return {
     id: user.id,
+    username: user.username,
     email: user.email,
     password: user.password,
-    name: user.name,
+    name: user.name || null,
     // Store address as JSON string in database
     address: user.address ? JSON.stringify(user.address) : null,
     avatar_url: user.avatarUrl || null,

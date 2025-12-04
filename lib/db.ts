@@ -48,12 +48,18 @@ export interface AddressData {
 
 export interface User {
   id: string;
+  username: string; // Unique username (required, cannot be duplicated)
   email: string;
   password: string; // 实际应用中应该存储哈希
-  name: string;
+  name?: string; // Display name (optional, can be duplicated, editable in profile)
   address?: AddressData; // Changed from string to AddressData object
   avatarUrl?: string; // User's custom avatar image URL
   createdAt: string;
+}
+
+// Helper function to get display name (name if exists, otherwise username)
+export function getDisplayName(user: { name?: string; username: string }): string {
+  return user.name?.trim() || user.username;
 }
 
 export interface Item {
@@ -105,6 +111,14 @@ export const usersDb = {
     }
     const users = readData<User[]>(usersFile, []);
     return users.find(u => u.email === email);
+  },
+
+  getByUsername: async (username: string): Promise<User | undefined> => {
+    if (useSupabase) {
+      return await usersDbSupabase.getByUsername(username);
+    }
+    const users = readData<User[]>(usersFile, []);
+    return users.find(u => u.username === username);
   },
 
   create: async (user: User): Promise<void> => {

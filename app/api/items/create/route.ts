@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { itemsDb, usersDb } from '@/lib/db';
+import { itemsDb, usersDb, getDisplayName } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       image: '📦', // Default emoji
       imageUrl: imageUrl || undefined,
       available: available !== false,
-      ownerName: userData.name,
+      ownerName: getDisplayName(userData), // Use display name (name if exists, otherwise username)
       userId: user.userId,
     };
 

@@ -19,9 +19,12 @@ export async function GET(
     }
 
     // Return public user info only (no password)
+    // Use getDisplayName helper to get display name (name if exists, otherwise username)
+    const { getDisplayName } = await import('@/lib/db');
     return NextResponse.json({
       id: user.id,
-      name: user.name,
+      name: getDisplayName(user),
+      username: user.username,
       avatarUrl: user.avatarUrl,
     });
   } catch (error) {

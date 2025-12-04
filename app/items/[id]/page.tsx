@@ -216,7 +216,9 @@ export default function ItemDetailPage() {
                         size="md" 
                       />
                     )}
-                    <div className="text-white font-black text-lg">{item.ownerName}</div>
+                    <div className="text-white font-black text-lg">
+                      {ownerInfo ? ownerInfo.name : item.ownerName}
+                    </div>
                   </div>
                 </div>
                 <div className="glass rounded-2xl p-5 border border-white/10">

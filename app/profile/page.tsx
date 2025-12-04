@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '../contexts/LanguageContext';
 import UserAvatar from '../components/UserAvatar';
-import { User, AddressData } from '@/lib/db';
+import { User, AddressData, getDisplayName } from '@/lib/db';
 
 // Type guard function
 function isAddressData(address: any): address is AddressData {
@@ -27,7 +27,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [editingAvatar, setEditingAvatar] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
+  const [editingName, setEditingName] = useState(false);
   const [newEmail, setNewEmail] = useState('');
+  const [newName, setNewName] = useState('');
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -56,6 +58,7 @@ export default function ProfilePage() {
       }
       setUser(userData);
       setNewEmail(userData.email);
+      setNewName(userData.name || '');
     } catch (error) {
       console.error('Failed to fetch user data:', error);
       router.push('/login');
@@ -140,6 +143,33 @@ export default function ProfilePage() {
     }
   };
 
+  const saveName = async () => {
+    setUploading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/user/update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName.trim() || null }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || (language === 'en' ? 'Failed to update name' : 'Aggiornamento nome fallito'));
+        return;
+      }
+
+      setUser(data);
+      setEditingName(false);
+    } catch (error) {
+      setError(language === 'en' ? 'Failed to update name' : 'Aggiornamento nome fallito');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20 bg-[#0a0a0f]">
@@ -171,7 +201,7 @@ export default function ProfilePage() {
           <div className="bg-gradient-to-r from-primary-500/20 via-primary-500/10 to-transparent p-8 border-b border-white/10">
             <div className="flex items-center space-x-6">
               <div className="relative">
-                <UserAvatar name={user.name} avatarUrl={user.avatarUrl} size="lg" />
+                <UserAvatar name={getDisplayName(user)} avatarUrl={user.avatarUrl} size="lg" />
                 {editingAvatar ? (
                   <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
                     <input
@@ -199,8 +229,9 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="flex-1">
-                <h1 className="text-4xl font-black text-white mb-2">{user.name}</h1>
+                <h1 className="text-4xl font-black text-white mb-2">{getDisplayName(user)}</h1>
                 <p className="text-gray-400">{user.email}</p>
+                <p className="text-gray-500 text-sm mt-1">@{user.username}</p>
               </div>
             </div>
             {editingAvatar && (
@@ -243,6 +274,84 @@ export default function ProfilePage() {
               </div>
             )}
             <div className="space-y-6">
+              {/* Display Name */}
+              <div className="glass rounded-2xl p-6 border border-white/10">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">
+                    {language === 'en' ? 'Display Name' : 'Nome Visualizzato'}
+                  </div>
+                  {!editingName && (
+                    <button
+                      onClick={() => {
+                        setEditingName(true);
+                        setNewName(user.name || '');
+                      }}
+                      className="text-primary-400 hover:text-primary-300 text-sm font-bold transition-colors"
+                    >
+                      {language === 'en' ? 'Edit' : 'Modifica'}
+                    </button>
+                  )}
+                </div>
+                {editingName ? (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 transition-all"
+                      placeholder={language === 'en' ? 'Enter display name (optional)' : 'Inserisci nome visualizzato (opzionale)'}
+                    />
+                    <div className="text-xs text-gray-500 mb-3">
+                      {language === 'en' 
+                        ? 'Leave empty to use username as display name'
+                        : 'Lascia vuoto per usare il nome utente come nome visualizzato'
+                      }
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={saveName}
+                        disabled={uploading}
+                        className="bg-primary-500 text-[#0a0a0f] px-4 py-2 rounded-xl hover:bg-primary-400 transition-all font-black disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {uploading 
+                          ? (language === 'en' ? 'Saving...' : 'Salvataggio...')
+                          : (language === 'en' ? 'Save' : 'Salva')
+                        }
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingName(false);
+                          setNewName(user.name || '');
+                        }}
+                        className="bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition-all font-black"
+                      >
+                        {language === 'en' ? 'Cancel' : 'Annulla'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-white font-semibold text-lg">
+                    {getDisplayName(user)}
+                    {!user.name && (
+                      <span className="text-gray-500 text-sm ml-2">
+                        ({language === 'en' ? 'using username' : 'usa nome utente'})
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Username (read-only) */}
+              <div className="glass rounded-2xl p-6 border border-white/10">
+                <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
+                  {language === 'en' ? 'Username' : 'Nome Utente'}
+                </div>
+                <div className="text-white font-semibold text-lg">@{user.username}</div>
+                <div className="text-gray-500 text-sm mt-1">
+                  {language === 'en' ? 'Cannot be changed' : 'Non può essere modificato'}
+                </div>
+              </div>
+
               {/* Email */}
               <div className="glass rounded-2xl p-6 border border-white/10">
                 <div className="flex items-center justify-between mb-2">
