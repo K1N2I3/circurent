@@ -198,7 +198,8 @@ function convertUserToDb(user: User): any {
     username: user.username,
     email: user.email,
     password: user.password,
-    name: user.name || null,
+    // Ensure name is never null (database constraint) - use username as fallback
+    name: user.name || user.username || 'User',
     // Store address as JSON string in database
     address: user.address ? JSON.stringify(user.address) : null,
     avatar_url: user.avatarUrl || null,

@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
       username: trimmedUsername,
       email,
       password: hashedPassword,
-      name: undefined, // name is optional, can be set later in profile
+      // Use username as default name if name is not provided (required by database)
+      name: trimmedUsername, // name is optional in app, but required in DB, so use username as default
       address: address || undefined, // AddressData object or undefined
       createdAt: new Date().toISOString(),
     };
