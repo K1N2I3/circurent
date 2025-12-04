@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { usersDbSupabase, itemsDbSupabase, rentalsDbSupabase } from './db-supabase';
+// Re-export types from types.ts for backward compatibility
+export type { AddressData, User, Item, Rental } from './types';
+export { getDisplayName } from './types';
 
 const dataDir = path.join(process.cwd(), 'data');
 
@@ -38,55 +41,8 @@ function writeData<T>(filePath: string, data: T): void {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
-export interface AddressData {
-  street: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-}
-
-export interface User {
-  id: string;
-  username: string; // Unique username (required, cannot be duplicated)
-  email: string;
-  password: string; // 实际应用中应该存储哈希
-  name?: string; // Display name (optional, can be duplicated, editable in profile)
-  address?: AddressData; // Changed from string to AddressData object
-  avatarUrl?: string; // User's custom avatar image URL
-  createdAt: string;
-}
-
-// Helper function to get display name (name if exists, otherwise username)
-export function getDisplayName(user: { name?: string; username: string }): string {
-  return user.name?.trim() || user.username;
-}
-
-export interface Item {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  pricePerDay: number;
-  image: string; // emoji or image URL
-  imageUrl?: string; // actual image URL
-  available: boolean;
-  ownerName: string; // Name of the person renting out this item
-  userId?: string; // ID of the user who owns this item (for user-created items)
-}
-
-export interface Rental {
-  id: string;
-  userId: string;
-  itemId: string;
-  startDate: string;
-  endDate: string;
-  totalPrice: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  paymentMethod: 'paypal' | 'credit_card';
-  paymentId?: string;
-  createdAt: string;
-}
+// Import types for internal use
+import type { User, Item, Rental } from './types';
 
 // 用户数据操作 - 自动选择 Supabase 或文件系统
 export const usersDb = {

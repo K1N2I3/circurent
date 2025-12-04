@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Item } from '@/lib/db';
+import { Item } from '@/lib/types';
 import ItemImage from '../components/ItemImage';
 
 export default function RentalsPage() {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Item } from '@/lib/db';
+import { Item } from '@/lib/types';
 import { useLanguage } from './contexts/LanguageContext';
 import { getCategoryTranslation } from '@/lib/i18n';
 import ItemImage from './components/ItemImage';

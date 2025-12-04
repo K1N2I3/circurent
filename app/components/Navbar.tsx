@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import UserMenu from './UserMenu';
-import { getDisplayName } from '@/lib/db';
+import { getDisplayName } from '@/lib/types';
 
 interface User {
   id: string;
-  name: string;
+  username: string;
+  name?: string;
   email: string;
   avatarUrl?: string;
 }

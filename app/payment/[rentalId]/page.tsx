@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
-import { Rental, Item } from '@/lib/db';
+import { Rental, Item } from '@/lib/types';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function PaymentPage() {

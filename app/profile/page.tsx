@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '../contexts/LanguageContext';
 import UserAvatar from '../components/UserAvatar';
-import { User, AddressData, getDisplayName } from '@/lib/db';
+import { User, AddressData, getDisplayName } from '@/lib/types';
 
 // Type guard function
 function isAddressData(address: any): address is AddressData {

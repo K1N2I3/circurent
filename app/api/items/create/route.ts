@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { itemsDb, usersDb, getDisplayName } from '@/lib/db';
+import { itemsDb, usersDb } from '@/lib/db';
+import { getDisplayName } from '@/lib/types';
 import { getCurrentUser } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 

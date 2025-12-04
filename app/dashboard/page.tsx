@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Rental, Item } from '@/lib/db';
+import { Rental, Item } from '@/lib/types';
 import { useLanguage } from '../contexts/LanguageContext';
 import ItemImage from '../components/ItemImage';
 
