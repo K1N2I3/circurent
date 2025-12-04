@@ -8,9 +8,10 @@ import UserAvatar from './UserAvatar';
 
 interface UserMenuProps {
   userName: string;
+  avatarUrl?: string;
 }
 
-export default function UserMenu({ userName }: UserMenuProps) {
+export default function UserMenu({ userName, avatarUrl }: UserMenuProps) {
   const router = useRouter();
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -68,14 +69,14 @@ export default function UserMenu({ userName }: UserMenuProps) {
         className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full transition-all hover:opacity-80"
         aria-label="User menu"
       >
-        <UserAvatar name={userName} size="md" />
+        <UserAvatar name={userName} avatarUrl={avatarUrl} size="md" />
       </button>
 
       {isOpen && (
         <div className="absolute right-0 mt-3 w-56 glass rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-50 animate-fade-in">
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <UserAvatar name={userName} size="sm" />
+              <UserAvatar name={userName} avatarUrl={avatarUrl} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-black text-white truncate">{userName}</p>
               </div>

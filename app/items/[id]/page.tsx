@@ -7,6 +7,7 @@ import { Item } from '@/lib/db';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getCategoryTranslation } from '@/lib/i18n';
 import ItemImage from '../../components/ItemImage';
+import UserAvatar from '../../components/UserAvatar';
 
 export default function ItemDetailPage() {
   const params = useParams();
@@ -15,6 +16,7 @@ export default function ItemDetailPage() {
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [ownerInfo, setOwnerInfo] = useState<{ name: string; avatarUrl?: string } | null>(null);
   const [rentalData, setRentalData] = useState({
     startDate: '',
     endDate: '',
@@ -50,6 +52,24 @@ export default function ItemDetailPage() {
       }
       const data = await response.json();
       setItem(data);
+
+      // Fetch owner info if item has userId
+      if (data.userId) {
+        try {
+          const ownerResponse = await fetch(`/api/users/${data.userId}`);
+          if (ownerResponse.ok) {
+            const ownerData = await ownerResponse.json();
+            setOwnerInfo(ownerData);
+          }
+        } catch (error) {
+          console.error('Failed to fetch owner info:', error);
+          // Fallback to ownerName
+          setOwnerInfo({ name: data.ownerName });
+        }
+      } else {
+        // For system items (CircuRent), use ownerName
+        setOwnerInfo({ name: data.ownerName });
+      }
     } catch (error) {
       console.error('Failed to fetch item:', error);
     } finally {
@@ -186,10 +206,18 @@ export default function ItemDetailPage() {
               <div className="grid grid-cols-2 gap-4 mb-10">
                 <div className="glass rounded-2xl p-5 border border-white/10">
                   <div className="flex items-center text-gray-400 mb-3">
-                    <span className="text-2xl mr-3">👤</span>
                     <span className="text-sm font-bold uppercase tracking-wider">{language === 'en' ? 'Owner' : 'Proprietario'}</span>
                   </div>
-                  <div className="text-white font-black text-lg">{item.ownerName}</div>
+                  <div className="flex items-center gap-3">
+                    {ownerInfo && (
+                      <UserAvatar 
+                        name={ownerInfo.name} 
+                        avatarUrl={ownerInfo.avatarUrl} 
+                        size="md" 
+                      />
+                    )}
+                    <div className="text-white font-black text-lg">{item.ownerName}</div>
+                  </div>
                 </div>
                 <div className="glass rounded-2xl p-5 border border-white/10">
                   <div className="flex items-center text-gray-400 mb-3">

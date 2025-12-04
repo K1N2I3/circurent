@@ -11,6 +11,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
 }
 
 export default function Navbar() {
@@ -95,7 +96,7 @@ export default function Navbar() {
             {isLoggedIn && user ? (
               <>
                 <LanguageSwitcher />
-                <UserMenu userName={user.name} />
+                <UserMenu userName={user.name} avatarUrl={user.avatarUrl} />
               </>
             ) : (
               <>

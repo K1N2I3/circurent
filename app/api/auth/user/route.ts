@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
       email: userData.email,
       name: userData.name,
       address: userData.address,
+      avatarUrl: userData.avatarUrl,
       createdAt: userData.createdAt,
     });
   } catch (error) {

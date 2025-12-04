@@ -46,6 +46,7 @@ export const usersDbSupabase = {
     if (updates.password !== undefined) updateData.password = updates.password;
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.address !== undefined) updateData.address = updates.address;
+    if (updates.avatarUrl !== undefined) updateData.avatar_url = updates.avatarUrl;
     
     const { error } = await supabaseAdmin.from('users').update(updateData).eq('id', id);
     if (error) throw error;
@@ -174,6 +175,7 @@ function convertUserFromDb(dbUser: any): User {
     password: dbUser.password,
     name: dbUser.name,
     address,
+    avatarUrl: dbUser.avatar_url || undefined,
     createdAt: dbUser.created_at,
   };
 }
@@ -186,6 +188,7 @@ function convertUserToDb(user: User): any {
     name: user.name,
     // Store address as JSON string in database
     address: user.address ? JSON.stringify(user.address) : null,
+    avatar_url: user.avatarUrl || null,
     created_at: user.createdAt,
   };
 }

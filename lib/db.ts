@@ -52,6 +52,7 @@ export interface User {
   password: string; // 实际应用中应该存储哈希
   name: string;
   address?: AddressData; // Changed from string to AddressData object
+  avatarUrl?: string; // User's custom avatar image URL
   createdAt: string;
 }
 
